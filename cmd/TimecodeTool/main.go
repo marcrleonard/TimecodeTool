@@ -7,6 +7,8 @@ import (
 
 func main() {
 
+	// Todo Begin adding arg parsing!!!
+
 	tcObj2 := internal.TimecodeFromString("00:06:59;25", 29.97)
 	for x := 0; x < 10; x++ {
 		tcObj2.AddFrames(1)
