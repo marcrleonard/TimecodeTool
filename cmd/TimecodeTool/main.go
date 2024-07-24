@@ -3,9 +3,38 @@ package main
 import (
 	"TimecodeTool/internal"
 	"fmt"
+	"os"
+	"strconv"
 )
 
 func main() {
+
+	if len(os.Args) == 1 {
+		println("TimecodeTool v0.1.0\nAuthor: Marc Leonard")
+		os.Exit(0)
+	} else if len(os.Args) == 2 {
+		println("Please provide a timecode and an a framerate.")
+	} else if len(os.Args) == 3 {
+
+		tc := os.Args[1]
+		_fr := os.Args[2]
+
+		fr, err := strconv.ParseFloat(_fr, 64)
+		if err != nil {
+			println("Please provide a valid framerate.")
+			os.Exit(1)
+		}
+
+		tcObj2 := internal.TimecodeFromString(tc, fr)
+
+		println("Frame Index (0 based):", tcObj2.GetFrameIdx())
+		fmt.Printf("Framerate: %f\n", fr)
+		println(tc, tcObj2.Validate().Error())
+
+		os.Exit(0)
+	}
+
+	os.Exit(0)
 
 	// Todo Begin adding arg parsing!!!
 
