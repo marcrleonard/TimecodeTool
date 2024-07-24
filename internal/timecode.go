@@ -16,19 +16,18 @@ type Timecode struct {
 	_timecode string
 }
 
-func (t *Timecode) getTimecode() string {
+func (t *Timecode) GetTimecode() string {
 	// calling this will spit out the normalized timecode. For instance, you can instantiate
 	// a timecode with a string that contains something like 00:00:10:99 (you can't have 99 frames)
 	// But we will run divmod to convert that to a real timecode.
-
 	fq, fr := divmod(int64(t._frames), int64(getTimeBase(t.FrameRate)))
-
+	// println(fq, fr)
 	mq, sr := divmod(int64(t._secs)+fq, 60)
-
+	// println(mq, sr)
 	hq, mr := divmod(int64(t._mins)+mq, 60)
-
+	// println(hq, mr)
 	o, hr := divmod(int64(t._hours)+hq, 24)
-
+	// println(o, hr)
 	_ = o
 
 	return formatTimecode(int64(hr), int64(mr), int64(sr), int64(fr), t.DropFrame)
@@ -36,20 +35,22 @@ func (t *Timecode) getTimecode() string {
 
 func (t *Timecode) Validate() error {
 
-	asd := TimecodeFromFrames(int64(t.getFrameCount()), t.FrameRate, t.DropFrame)
-
-	if asd.getTimecode() != t._timecode {
-		return errors.New(fmt.Sprintf("Timecode is not valid! %s != %s", asd.getTimecode(), t.getTimecode()))
+	if t.GetTimecode() != t._timecode {
+		return errors.New(fmt.Sprintf("Timecode is not valid! %s != %s", t._timecode, t.GetTimecode()))
 	} else {
 		return nil
 	}
 }
 
-func (t *Timecode) Print() {
-	fmt.Println(t.getTimecode())
+func (t *Timecode) PrintPieces() {
+	fmt.Println(t._hours, t._mins, t._secs, t._frames)
 }
 
-func (t *Timecode) getFrameCount() int {
+func (t *Timecode) Print() {
+	fmt.Println(t.GetTimecode())
+}
+
+func (t *Timecode) GetFrameCount() int {
 
 	var timeBase int = getTimeBase(t.FrameRate)
 	var frameCount int = 0
@@ -82,7 +83,7 @@ func (t *Timecode) getFrameCount() int {
 func (t *Timecode) AddFrames(frames int) {
 	if t.DropFrame {
 		// todo: investigate why we need this +1
-		newFC := int64(t.getFrameCount()) + int64(frames) + 1
+		newFC := int64(t.GetFrameCount()) + int64(frames) + 1
 
 		tt := TimecodeFromFrames(newFC, t.FrameRate, t.DropFrame)
 		t._hours = tt._hours
@@ -122,5 +123,5 @@ func (t *Timecode) AddFrames(frames int) {
 }
 
 func (t *Timecode) GetFrameIdx() int {
-	return t.getFrameCount() - 1
+	return t.GetFrameCount() - 1
 }

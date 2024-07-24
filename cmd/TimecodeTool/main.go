@@ -26,10 +26,15 @@ func main() {
 		}
 
 		tcObj2 := internal.TimecodeFromString(tc, fr)
+		isValid := "Valid Timecode."
+		err = tcObj2.Validate()
+		if err != nil {
+			isValid = err.Error()
+		}
+		println(tcObj2.GetTimecode(), isValid)
 
 		println("Frame Index (0 based):", tcObj2.GetFrameIdx())
 		fmt.Printf("Framerate: %f\n", fr)
-		println(tc, tcObj2.Validate().Error())
 
 		os.Exit(0)
 	}

@@ -28,7 +28,7 @@ func (t *TimecodeSpan) GetSpanTimecode() string {
 	_t._frames = 0
 	_t.AddFrames(t.GetTotalFrames())
 
-	return _t.getTimecode()
+	return _t.GetTimecode()
 
 }
 

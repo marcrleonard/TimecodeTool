@@ -22,11 +22,11 @@ func NewTimecodeSpan(startTimecode string, endTimecode string, frameRate float64
 
 func TimecodeFromFrames(inputFrameCount int64, frameRate float64, isDropframe bool) Timecode {
 
-	if inputFrameCount < 1 {
-		panic("Framecount must be >= 1")
-	}
+	// if inputFrameCount < 1 {
+	// 	panic("Framecount must be >= 1")
+	// }
 
-	inputFrameIdx := inputFrameCount - 1
+	// inputFrameIdx := inputFrameCount - 1
 
 	tcObj := Timecode{}
 	if isDropframe {
@@ -36,6 +36,9 @@ func TimecodeFromFrames(inputFrameCount int64, frameRate float64, isDropframe bo
 		//Framerate should be 29.97 or 59.94, otherwise the calculations will be off.
 
 		// adapted from https://www.davidheidelberger.com/2010/06/10/drop-frame-timecode/
+
+		// I think JUST this function needs the idx
+		inputFrameIdx := inputFrameCount - 1
 
 		framenumber := int(inputFrameIdx)
 
@@ -79,7 +82,7 @@ func TimecodeFromFrames(inputFrameCount int64, frameRate float64, isDropframe bo
 
 	} else {
 
-		sr, frames := divmod(inputFrameIdx, int64(getTimeBase(frameRate)))
+		sr, frames := divmod(inputFrameCount, int64(getTimeBase(frameRate)))
 		mr, seconds := divmod(sr, 60)
 		hr, minutes := divmod(mr, 60)
 		hours, _ := divmod(hr, 60)
@@ -126,6 +129,7 @@ func TimecodeFromString(inputTimecode string, frameRate float64) Timecode {
 		panic("Seconds are malformed.")
 	}
 	_frames, err := strconv.Atoi(hmsf[3])
+	// println(_frames)
 	if err != nil {
 		panic("Seconds are malformed.")
 	}
