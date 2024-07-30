@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"strconv"
 )
 
 type Timecode struct {
@@ -14,6 +15,11 @@ type Timecode struct {
 	_secs     int
 	_frames   int
 	_timecode string
+}
+
+func (t *Timecode) GetFramerateString() string {
+	s := strconv.FormatFloat(t.FrameRate, 'f', -1, 64)
+	return s
 }
 
 func (t *Timecode) GetTimecode() string {
@@ -33,13 +39,35 @@ func (t *Timecode) GetTimecode() string {
 	return formatTimecode(int64(hr), int64(mr), int64(sr), int64(fr), t.DropFrame)
 }
 
-func (t *Timecode) Validate() error {
+func (t *Timecode) GetValid() string {
+	isValid := "Valid"
+	err := t.Validate()
+	if err != nil {
+		// isValid = err.Error()
+		isValid = "Not Valid"
+	}
 
-	if t.GetTimecode() != t._timecode {
+	return isValid
+}
+
+func (t *Timecode) Validate() error {
+	// println("+++")
+	newTc := TimecodeFromFrames(int64(t.GetFrameCount()), t.FrameRate, t.DropFrame)
+	// println("+++")
+	if newTc.GetTimecode() != t._timecode {
 		return errors.New(fmt.Sprintf("Timecode is not valid! %s != %s", t._timecode, t.GetTimecode()))
 	} else {
 		return nil
 	}
+
+	// This was the original way to test, but it didn't quite work with df timecode. Not sure why
+	// I'm leaving it here if I need it in the future.
+
+	// if t.GetTimecode() != t._timecode {
+	// 	return errors.New(fmt.Sprintf("Timecode is not valid! %s != %s", t._timecode, t.GetTimecode()))
+	// } else {
+	// 	return nil
+	// }
 }
 
 func (t *Timecode) PrintPieces() {
@@ -98,8 +126,8 @@ func (t *Timecode) AddFrames(frames int) {
 
 		// Do we need the divmod below?
 
-		newFrames := t._frames + frames
-		print(newFrames, "\n")
+		// newFrames := t._frames + frames
+		// print(newFrames, "\n")
 		fq, fr := divmod(int64(t._frames+frames), int64(getTimeBase(t.FrameRate)))
 		t._frames = int(fr)
 		// fmt.Println(fq, fr)
