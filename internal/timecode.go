@@ -52,7 +52,7 @@ func (t *Timecode) GetValid() string {
 
 func (t *Timecode) Validate() error {
 	// println("+++")
-	newTc := TimecodeFromFrames(int64(t.GetFrameCount()), t.FrameRate, t.DropFrame)
+	newTc := TimecodeFromFrames(int64(t.GetFrameIdx()), t.FrameRate, t.DropFrame)
 	// println("+++")
 	if newTc.GetTimecode() != t._timecode {
 		return errors.New(fmt.Sprintf("Timecode is not valid! %s != %s", t._timecode, t.GetTimecode()))
@@ -78,40 +78,10 @@ func (t *Timecode) Print() {
 	fmt.Println(t.GetTimecode())
 }
 
-func (t *Timecode) GetFrameCount() int {
-
-	var timeBase int = getTimeBase(t.FrameRate)
-	var frameCount int = 0
-	if t.DropFrame == false {
-		hrsToSecs := t._hours * 60 * 60
-		minsToSecs := t._mins * 60
-		totalSeconds := hrsToSecs + minsToSecs + t._secs
-
-		frameCount = (totalSeconds * timeBase) + t._frames
-	} else {
-		// //CONVERT DROP FRAME TIMECODE TO A FRAME NUMBER
-		//Code by David Heidelberger, adapted from Andrew Duncan
-		//Given ints called hours, minutes, seconds, frames, and a double called framerate
-
-		// adapted from https://www.davidheidelberger.com/2010/06/10/drop-frame-timecode/
-
-		dropFrames := int(math.Round(t.FrameRate * 0.066666)) //Number of drop frames is 6% of framerate rounded to nearest integer
-		// Should this ^ be round or int? todo: This could be wrong.
-
-		hourFrames := timeBase * 60 * 60          //Number of frames per hour (non-drop)
-		minuteFrames := timeBase * 60             //Number of frames per minute (non-drop)
-		totalMinutes := (60 * t._hours) + t._mins //Total number of minuts
-		frameCount = ((hourFrames * t._hours) + (minuteFrames * t._mins) + (timeBase * t._secs) + t._frames) - (dropFrames * (totalMinutes - (totalMinutes / 10)))
-
-	}
-
-	return frameCount
-}
-
 func (t *Timecode) AddFrames(frames int) {
 	if t.DropFrame {
 		// todo: investigate why we need this +1
-		newFC := int64(t.GetFrameCount()) + int64(frames) + 1
+		newFC := int64(t.GetFrameIdx()) + int64(frames) + 1
 
 		tt := TimecodeFromFrames(newFC, t.FrameRate, t.DropFrame)
 		t._hours = tt._hours
@@ -151,5 +121,32 @@ func (t *Timecode) AddFrames(frames int) {
 }
 
 func (t *Timecode) GetFrameIdx() int {
-	return t.GetFrameCount() - 1
+
+	var timeBase int = getTimeBase(t.FrameRate)
+	var frameCount int = 0
+	if t.DropFrame == false {
+		hrsToSecs := t._hours * 60 * 60
+		minsToSecs := t._mins * 60
+		totalSeconds := hrsToSecs + minsToSecs + t._secs
+
+		frameCount = (totalSeconds * timeBase) + t._frames
+	} else {
+		// //CONVERT DROP FRAME TIMECODE TO A FRAME NUMBER
+		//Code by David Heidelberger, adapted from Andrew Duncan
+		//Given ints called hours, minutes, seconds, frames, and a double called framerate
+
+		// adapted from https://www.davidheidelberger.com/2010/06/10/drop-frame-timecode/
+
+		dropFrames := int(math.Round(t.FrameRate * 0.066666)) //Number of drop frames is 6% of framerate rounded to nearest integer
+		// Should this ^ be round or int? todo: This could be wrong.
+
+		hourFrames := timeBase * 60 * 60          //Number of frames per hour (non-drop)
+		minuteFrames := timeBase * 60             //Number of frames per minute (non-drop)
+		totalMinutes := (60 * t._hours) + t._mins //Total number of minuts
+		frameCount = ((hourFrames * t._hours) + (minuteFrames * t._mins) + (timeBase * t._secs) + t._frames) - (dropFrames * (totalMinutes - (totalMinutes / 10)))
+
+		// frameCount += 1 // is this correct!?
+	}
+
+	return frameCount
 }

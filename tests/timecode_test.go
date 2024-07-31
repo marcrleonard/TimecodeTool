@@ -47,7 +47,19 @@ func TestDFNonValid(t *testing.T) {
 	tcdf := internal.TimecodeFromString(invalidTimecode, 29.97)
 
 	if tcdf.Validate() != nil {
-		t.Fatalf(`%s should not be valid for DF timecode`, invalidTimecode)
+		t.Fatalf(`%s should not be valid for 29.97 DF timecode`, invalidTimecode)
+	}
+
+}
+
+func TestNDFNonValid(t *testing.T) {
+
+	invalidTimecode := "00:07:00;24"
+
+	tcdf := internal.TimecodeFromString(invalidTimecode, 23.98)
+
+	if tcdf.Validate() != nil {
+		t.Fatalf(`%s should not be valid for 23.98 NDF timecode`, invalidTimecode)
 	}
 
 }

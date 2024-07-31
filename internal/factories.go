@@ -20,7 +20,7 @@ func NewTimecodeSpan(startTimecode string, endTimecode string, frameRate float64
 	}
 }
 
-func TimecodeFromFrames(inputFrameCount int64, frameRate float64, isDropframe bool) Timecode {
+func TimecodeFromFrames(inputFrameIdx int64, frameRate float64, isDropframe bool) Timecode {
 
 	// if inputFrameCount < 1 {
 	// 	panic("Framecount must be >= 1")
@@ -38,7 +38,7 @@ func TimecodeFromFrames(inputFrameCount int64, frameRate float64, isDropframe bo
 		// adapted from https://www.davidheidelberger.com/2010/06/10/drop-frame-timecode/
 
 		// I think JUST this function needs the idx
-		inputFrameIdx := inputFrameCount - 1
+		// inputFrameIdx := inputFrameIdx - 1
 
 		framenumber := int(inputFrameIdx)
 
@@ -82,7 +82,7 @@ func TimecodeFromFrames(inputFrameCount int64, frameRate float64, isDropframe bo
 
 	} else {
 
-		sr, frames := divmod(inputFrameCount, int64(getTimeBase(frameRate)))
+		sr, frames := divmod(inputFrameIdx, int64(getTimeBase(frameRate)))
 		mr, seconds := divmod(sr, 60)
 		hr, minutes := divmod(mr, 60)
 		hours, _ := divmod(hr, 60)

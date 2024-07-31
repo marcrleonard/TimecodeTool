@@ -9,6 +9,13 @@ import (
 
 func main() {
 
+	tt := internal.TimecodeFromFrames(0, 29.97, true)
+	println(tt.GetTimecode())
+	println(tt.GetFrameIdx())
+	// println(tt.GetFrameIdx())
+	// println(tt.GetValid())
+	// println("--------")
+
 	//var firstTimecode internal.Timecode;
 	// var lastTimecode internal.Timecode;
 
@@ -21,13 +28,9 @@ func main() {
 		println("Please provide a timecode and an a framerate.")
 	} else if len(os.Args) > 2 {
 
-		tc := os.Args[1]
+		tc := os.Args[2]
 
-		if len(os.Args) == 4 {
-
-		}
-
-		_fr := os.Args[len(os.Args)-1]
+		_fr := os.Args[1]
 
 		fr, err := strconv.ParseFloat(_fr, 64)
 		if err != nil {
@@ -38,14 +41,14 @@ func main() {
 		lastTimecode := internal.TimecodeFromString(tc, fr)
 
 		firstTimecode := internal.TimecodeFromFrames(1, lastTimecode.FrameRate, lastTimecode.DropFrame)
-		if len(os.Args) > 2 {
-			_ = os.Args[2]
+		if len(os.Args) == 4 {
+			firstTimecode = internal.TimecodeFromString(os.Args[3], fr)
 		}
 
-		fmt.Printf("Start Timecode: %s (%s)\n", firstTimecode.GetTimecode(), firstTimecode.GetValid())
-		fmt.Printf("End Timecode: %s (%s)\n", lastTimecode.GetTimecode(), lastTimecode.GetValid())
+		fmt.Printf("First Timecode: %s (%s)\n", firstTimecode.GetTimecode(), firstTimecode.GetValid())
+		fmt.Printf("Last Timecode: %s (%s)\n", lastTimecode.GetTimecode(), lastTimecode.GetValid())
 
-		println("Frame Index (0 based):", lastTimecode.GetFrameIdx())
+		println("Last Timecode Frame Index (0 based):", lastTimecode.GetFrameIdx())
 		fmt.Printf("Framerate: %s\n", lastTimecode.GetFramerateString())
 		fmt.Println("Dropframe Timecode: ", lastTimecode.DropFrame)
 
