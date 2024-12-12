@@ -7,7 +7,10 @@
 
 ## Usage
 
-Coming soon!
+Modes of operation:
+`TimecodeTool 29.97 "00:07:00;00"` - returns: valid, frame start idx, maayyybeee time from 00:00:00:00?
+`TimecodeTool 23.98 "01:00:00:00" "01:01:00:00"` - returns valid, first frame idx, last frame idx (assuming inclusive), playback time, time span in frames
+`TimecodeTool 23.98 "01:00:00:00" + "00:00:01:00" + 23 - 00:00:00:10` - returns valid, first frame idx, last frame idx (assuming inclusive), time span in frames
 
 ## Building
 
