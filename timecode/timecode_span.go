@@ -1,4 +1,4 @@
-package internal
+package timecode
 
 import (
 	"fmt"
@@ -6,8 +6,8 @@ import (
 )
 
 type TimecodeSpan struct {
-	StartTimecode Timecode
-	EndTimecode   Timecode
+	StartTimecode *Timecode
+	EndTimecode   *Timecode
 	Framerate     float64
 	Dropframe     bool
 }

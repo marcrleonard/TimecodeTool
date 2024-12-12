@@ -1,7 +1,6 @@
-package internal
+package timecode
 
 import (
-	"errors"
 	"fmt"
 	"math"
 	"strconv"
@@ -52,22 +51,54 @@ func (t *Timecode) GetValid() string {
 
 func (t *Timecode) Validate() error {
 	// println("+++")
-	newTc := TimecodeFromFrames(int64(t.GetFrameIdx()), t.FrameRate, t.DropFrame)
-	// println("+++")
-	if newTc.GetTimecode() != t._timecode {
-		return errors.New(fmt.Sprintf("Timecode is not valid! %s != %s", t._timecode, t.GetTimecode()))
-	} else {
-		return nil
+
+	if t._hours > 23 {
+		return fmt.Errorf("Hours cannot be higher than 23")
 	}
 
-	// This was the original way to test, but it didn't quite work with df timecode. Not sure why
-	// I'm leaving it here if I need it in the future.
+	if t._mins > 59 {
+		return fmt.Errorf("Minutes cannot be higher than 59")
+	}
 
-	// if t.GetTimecode() != t._timecode {
-	// 	return errors.New(fmt.Sprintf("Timecode is not valid! %s != %s", t._timecode, t.GetTimecode()))
-	// } else {
-	// 	return nil
-	// }
+	if t._secs > 59 {
+		return fmt.Errorf("Minutes cannot be higher than 59")
+	}
+
+	lastAllowedFrame := int(math.Ceil(t.FrameRate)) - 1
+	if t._frames >= int(lastAllowedFrame) {
+		return fmt.Errorf("Frames cannot be higher than %d", lastAllowedFrame)
+	}
+
+	if t.DropFrame {
+		if 0 <= int(t._frames) || int(t._frames) < 2 {
+			// This is potentially wrong for dropframe.
+			newTcS := formatTimecode(
+				int64(t._hours),
+				int64(t._mins-1),
+				59,
+				int64(lastAllowedFrame),
+				t.DropFrame,
+			)
+
+			tc, _ := NewTimecodeFromString(newTcS, t.FrameRate)
+
+			valid := false
+			for i := 0; i < 3; i++ {
+				tc.AddFrames(1)
+				if tc.GetTimecode() == t._timecode {
+					valid = true
+					break
+				}
+			}
+
+			if !valid {
+				return fmt.Errorf("%s is not a valid timecode.", t._timecode)
+			}
+
+		}
+	}
+
+	return nil
 }
 
 func (t *Timecode) PrintPieces() {

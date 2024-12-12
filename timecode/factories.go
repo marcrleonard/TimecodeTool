@@ -1,6 +1,7 @@
-package internal
+package timecode
 
 import (
+	"fmt"
 	"math"
 	"strconv"
 	"strings"
@@ -12,9 +13,14 @@ func NewTimecodeSpan(startTimecode string, endTimecode string, frameRate float64
 		panic("startTimecode and endTimecode must both be dropframe or non-dropframe.")
 	}
 
+	s, err := NewTimecodeFromString(startTimecode, frameRate)
+	e, err := NewTimecodeFromString(endTimecode, frameRate)
+
+	_ = err
+
 	return TimecodeSpan{
-		StartTimecode: TimecodeFromString(startTimecode, frameRate),
-		EndTimecode:   TimecodeFromString(endTimecode, frameRate),
+		StartTimecode: s,
+		EndTimecode:   e,
 		Framerate:     frameRate,
 		Dropframe:     strings.Contains(startTimecode, ";") || strings.Contains(endTimecode, ";"),
 	}
@@ -76,9 +82,11 @@ func TimecodeFromFrames(inputFrameIdx int64, frameRate float64, isDropframe bool
 		seconds := (framenumber / frRound) % 60
 		minutes := ((framenumber / frRound) / 60) % 60
 		hours := (((framenumber / frRound) / 60) / 60)
-
 		tc_string := formatTimecode(int64(hours), int64(minutes), int64(seconds), int64(frames), true)
-		tcObj = TimecodeFromString(tc_string, frameRate)
+
+		// Fix this deref and deal with the error
+		tcObj, _ := NewTimecodeFromString(tc_string, frameRate)
+		return *tcObj
 
 	} else {
 
@@ -87,19 +95,22 @@ func TimecodeFromFrames(inputFrameIdx int64, frameRate float64, isDropframe bool
 		hr, minutes := divmod(mr, 60)
 		hours, _ := divmod(hr, 60)
 		tc_string := formatTimecode(hours, minutes, seconds, frames, isDropframe)
-		tcObj = TimecodeFromString(tc_string, frameRate)
+
+		// Fix this deref and deal with the error
+		tcObj, _ := NewTimecodeFromString(tc_string, frameRate)
+		return *tcObj
 	}
 
 	return tcObj
 
 }
 
-func TimecodeFromString(inputTimecode string, frameRate float64) Timecode {
+func NewTimecodeFromString(inputTimecode string, frameRate float64) (*Timecode, error) {
 
 	_timecode := inputTimecode
 
 	if len(inputTimecode) != 11 {
-		panic("Timecode is malformed. Please format as hh:mm:ss:ff")
+		return nil, fmt.Errorf("Timecode is malformed. Please format as hh:mm:ss:ff")
 	}
 
 	var tc Timecode
@@ -142,5 +153,5 @@ func TimecodeFromString(inputTimecode string, frameRate float64) Timecode {
 	tc.FrameRate = frameRate
 	tc.DropFrame = dropFrame
 
-	return tc
+	return &tc, nil
 }
