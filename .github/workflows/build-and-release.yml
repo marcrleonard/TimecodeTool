@@ -49,24 +49,13 @@ jobs:
           git tag -a "v$VERSION" -m "Release version $VERSION"
           git push origin "v$VERSION"
 
-      # Step 5: Create a GitHub Release
-      - name: Create GitHub Release
-        uses: actions/create-release@v1
+      # Step 5: Create GitHub Release and Upload Asset
+      - name: Create GitHub Release and Upload Asset
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: "v$VERSION"
-          release_name: "v$VERSION"
+#          release_name: "v$VERSION"
           body: "Release version $VERSION"
-          draft: false
-          prerelease: false
+          files: dist/TimecodeTool
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # or use the default token
-
-      - name: Upload release asset
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/TimecodeTool
-          asset_name: TimecodeTool
-          asset_content_type: application/octet-stream
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # or use the default token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # or use the default token
