@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
@@ -13,7 +14,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 # Fetch the last two commits to ensure HEAD^ is available
+          fetch-depth: 0
 
       - name: Ensure version is bumped
         id: check_version
@@ -35,33 +36,42 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_ENV
           echo "VERSION=$VERSION" >> $GITHUB_ENV  # Ensure VERSION is available
 
-      # Step 3: Build the Go project for both Linux and macOS
-      - name: Build Go project for Linux and macOS
+      # Step 3: Build the Go project for Linux, macOS, and Windows
+      - name: Build Go project for Linux, macOS (arm64), and Windows
         run: |
           mkdir -p dist
           
           # Build for Linux (default)
-          go build -o dist/TimecodeTool-linux cmd/TimecodeTool/main.go
+          go build -o dist/TimecodeTool-linux-amd64 cmd/TimecodeTool/main.go
           
-          # Build for macOS
-          GOOS=darwin GOARCH=amd64 go build -o dist/TimecodeTool-darwin cmd/TimecodeTool/main.go
+          # Build for macOS arm64
+          GOOS=darwin GOARCH=arm64 go build -o dist/TimecodeTool-osx-arm64 cmd/TimecodeTool/main.go
+
+          # Build for Windows amd64
+          GOOS=windows GOARCH=amd64 go build -o dist/TimecodeTool-windows-amd64.exe cmd/TimecodeTool/main.go
+
+          # Ensure the binaries are executable
+          chmod +x dist/TimecodeTool-linux-amd64
+          chmod +x dist/TimecodeTool-osx-arm64
+          chmod +x dist/TimecodeTool-windows-amd64.exe
 
       # Step 4: Tag the release
       - name: Create release tag
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "${{ env.VERSION }}" -m "Release version ${{ env.VERSION }}"
-          git push origin "${{ env.VERSION }}"
+          git tag -a "v${{ env.VERSION }}" -m "Release version ${{ env.VERSION }}"
+          git push origin "v${{ env.VERSION }}"
 
       # Step 5: Create GitHub Release and Upload Assets
       - name: Create GitHub Release and Upload Assets
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: "${{ env.VERSION }}"
+          tag_name: "v${{ env.VERSION }}"
           body: "Release version ${{ env.VERSION }}"
           files: |
-            dist/TimecodeTool-linux
-            dist/TimecodeTool-darwin
+            dist/TimecodeTool-linux-amd64
+            dist/TimecodeTool-osx-arm64
+            dist/TimecodeTool-windows-amd64.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # or use the default token
