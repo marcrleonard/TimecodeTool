@@ -50,11 +50,6 @@ jobs:
           # Build for Windows amd64
           GOOS=windows GOARCH=amd64 go build -o dist/TimecodeTool-windows-amd64.exe cmd/TimecodeTool/main.go
 
-          # Ensure the binaries are executable
-          chmod +x dist/TimecodeTool-linux-amd64
-          chmod +x dist/TimecodeTool-osx-arm64
-          chmod +x dist/TimecodeTool-windows-amd64.exe
-
       # Step 4: Tag the release
       - name: Create release tag
         run: |
