@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
@@ -34,28 +33,35 @@ jobs:
           # Read the new version
           VERSION=$(cat VERSION)
           echo "version=$VERSION" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_ENV  # Ensure VERSION is available
 
-      # Step 3: Build the Go project
-      - name: Build Go project
+      # Step 3: Build the Go project for both Linux and macOS
+      - name: Build Go project for Linux and macOS
         run: |
           mkdir -p dist
-          go build -o dist/TimecodeTool cmd/TimecodeTool/main.go
+          
+          # Build for Linux (default)
+          go build -o dist/TimecodeTool-linux cmd/TimecodeTool/main.go
+          
+          # Build for macOS
+          GOOS=darwin GOARCH=amd64 go build -o dist/TimecodeTool-darwin cmd/TimecodeTool/main.go
 
       # Step 4: Tag the release
       - name: Create release tag
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "v$VERSION" -m "Release version $VERSION"
-          git push origin "v$VERSION"
+          git tag -a "${{ env.VERSION }}" -m "Release version ${{ env.VERSION }}"
+          git push origin "${{ env.VERSION }}"
 
-      # Step 5: Create GitHub Release and Upload Asset
-      - name: Create GitHub Release and Upload Asset
+      # Step 5: Create GitHub Release and Upload Assets
+      - name: Create GitHub Release and Upload Assets
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: "v$VERSION"
-#          release_name: "v$VERSION"
-          body: "Release version $VERSION"
-          files: dist/TimecodeTool
+          tag_name: "${{ env.VERSION }}"
+          body: "Release version ${{ env.VERSION }}"
+          files: |
+            dist/TimecodeTool-linux
+            dist/TimecodeTool-darwin
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # or use the default token
