@@ -5,7 +5,9 @@ import (
 	"os"
 	"strconv"
 
+	"TimecodeTool"
 	"TimecodeTool/timecode"
+
 	"github.com/spf13/cobra"
 )
 
@@ -14,12 +16,10 @@ func main() {
 	var fps float64
 	var jsonOutput bool
 
-	version := "v0.1.0"
-
 	rootCmd := &cobra.Command{
 		Use:     "TimecodeTool",
 		Short:   "A timecode CLI tool",
-		Version: version,
+		Version: TimecodeTool.VERSION,
 		Long: fmt.Sprintf(
 			"TimecodeTool --fps=29.97 [Timecode]\n" +
 				"TimecodeTool --fps=29.97 [First Timecode] [Last Timecode]\n" +
