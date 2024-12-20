@@ -3,7 +3,21 @@ package timecode
 import (
 	"fmt"
 	"math"
+	"strconv"
 )
+
+func ParseStringToFrames(in string, fps float64) (int64, error) {
+	frames, err := strconv.Atoi(in)
+	if err == nil {
+		return int64(frames), nil
+	}
+	tc, err := NewTimecodeFromString(in, fps)
+	if err == nil {
+		return int64(tc.GetFrameIdx()), nil
+	}
+
+	return 0, fmt.Errorf("Could not parse time of %s", in)
+}
 
 func divmod(numerator, denominator int64) (quotient, remainder int64) {
 	quotient = numerator / denominator // integer division, decimals are truncated

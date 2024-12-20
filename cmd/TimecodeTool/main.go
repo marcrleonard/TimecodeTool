@@ -6,100 +6,94 @@ import (
 	"strconv"
 
 	"TimecodeTool/timecode"
+	"github.com/spf13/cobra"
 )
 
 func main() {
 
-	tt := timecode.TimecodeFromFrames(0, 29.97, true)
-	println(tt.GetTimecode())
-	println(tt.GetFrameIdx())
-	// println(tt.GetFrameIdx())
-	// println(tt.GetValid())
-	// println("--------")
+	var fps float64
+	var jsonOutput bool
 
-	//var firstTimecode internal.Timecode;
-	// var lastTimecode internal.Timecode;
+	version := "v0.1.0"
 
-	if len(os.Args) == 1 {
-		println("TimecodeTool v0.1.0\nAuthor: Marc Leonard")
-		println("	TimecodeTool [End Timecode] [FPS]")
-		println("	TimecodeTool [Start Timecode] [End Timecode] [FPS]")
-		os.Exit(0)
-	} else if len(os.Args) == 2 {
-		println("Please provide a timecode and an a framerate.")
-	} else if len(os.Args) > 2 {
+	rootCmd := &cobra.Command{
+		Use:     "TimecodeTool",
+		Short:   "A timecode CLI tool",
+		Version: version,
+		Long: fmt.Sprintf(
+			"TimecodeTool --fps=29.97 [Timecode]\n" +
+				"TimecodeTool --fps=29.97 [First Timecode] [Last Timecode]\n" +
+				"TimecodeTool --fps=29.97 [Timecode] + [Timecode] - [Frames]\n"),
+		Run: func(cmd *cobra.Command, args []string) {
 
-		tc := os.Args[2]
+			if len(args) == 0 {
+				cmd.Help()
+				os.Exit(1)
+			} else if len(args) == 1 {
+				startTc := args[0]
+				firstTc, _ := timecode.NewTimecodeFromString(startTc, fps)
+				fmt.Printf("Timecode: %s@%f (%s)\n", startTc, fps, firstTc.GetValid())
+			} else if len(args) == 2 {
 
-		_fr := os.Args[1]
+				startTc := args[0]
+				endTc := args[1]
 
-		fr, err := strconv.ParseFloat(_fr, 64)
-		if err != nil {
-			println("Please provide a valid framerate.")
-			os.Exit(1)
-		}
+				firstTc, _ := timecode.NewTimecodeFromString(startTc, fps)
+				lastTimecode, _ := timecode.NewTimecodeFromString(endTc, fps)
 
-		lastTimecode := timecode.NewTimecodeFromString(tc, fr)
+				fmt.Printf("First Timecode: %s (%s)\n", firstTc.GetTimecode(), firstTc.GetValid())
+				fmt.Printf("Last Timecode: %s (%s)\n", lastTimecode.GetTimecode(), lastTimecode.GetValid())
 
-		firstTimecode := timecode.TimecodeFromFrames(1, lastTimecode.FrameRate, lastTimecode.DropFrame)
-		if len(os.Args) == 4 {
-			firstTimecode = timecode.NewTimecodeFromString(os.Args[3], fr)
-		}
+				dfness := "NDF"
+				if lastTimecode.DropFrame {
+					dfness = "DF"
+				}
+				println("Last Timecode Frame Index (0 based):", lastTimecode.GetFrameIdx())
+				fmt.Printf(
+					"Framerate: %s%s\n",
+					strconv.FormatFloat(fps, 'f', -1, 64),
+					dfness,
+				)
 
-		fmt.Printf("First Timecode: %s (%s)\n", firstTimecode.GetTimecode(), firstTimecode.GetValid())
-		fmt.Printf("Last Timecode: %s (%s)\n", lastTimecode.GetTimecode(), lastTimecode.GetValid())
+			} else {
 
-		println("Last Timecode Frame Index (0 based):", lastTimecode.GetFrameIdx())
-		fmt.Printf("Framerate: %s\n", lastTimecode.GetFramerateString())
-		fmt.Println("Dropframe Timecode: ", lastTimecode.DropFrame)
+				firstTc, _ := timecode.NewTimecodeFromString(args[0], fps)
+				curIdx := 1
+				for {
+					if curIdx >= len(args)-1 {
+						break
+					}
 
+					opperator := args[curIdx]
+
+					nextTime := args[curIdx+1]
+
+					frames, err := timecode.ParseStringToFrames(nextTime, fps)
+					if err != nil {
+						return
+					}
+
+					switch opperator {
+					case "-":
+						firstTc.AddFrames(int(frames) * -1)
+					case "+":
+						firstTc.AddFrames(int(frames))
+					}
+
+					curIdx += 2
+				}
+
+				fmt.Println(firstTc.GetTimecode())
+			}
+		},
 	}
 
-	os.Exit(0)
+	rootCmd.PersistentFlags().Float64Var(&fps, "fps", 29.97, "Frame rate of timecodes")
+	rootCmd.Flags().BoolVar(&jsonOutput, "json-output", false, "Output as JSON")
 
-	// Todo Begin adding arg parsing!!!
-
-	tcObj2 := timecode.NewTimecodeFromString("00:06:59;25", 29.97)
-	for x := 0; x < 10; x++ {
-		tcObj2.AddFrames(1)
-		tcObj2.Print()
-	}
-
-	fmt.Println("------")
-
-	s := timecode.NewTimecodeSpan("00:00:00;00", "00:10:00;17", 29.97)
-
-	println("00:10:00;07", s.GetTotalFrames(), s.GetSpanRealtime())
-
-	ws := timecode.NewTimecodeSpan("00:00:00:00", "00:09:59:29", 29.97)
-
-	println("00:09:59:29", ws.GetTotalFrames(), ws.GetSpanRealtime())
-
-	fmt.Println("---Invalid DF Timecode---")
-
-	// This is not a valid timecode.
-	etc := timecode.NewTimecodeFromString("00:07:00;00", 29.97)
-	e := etc.Validate()
-	if e != nil {
-		println(e.Error())
-	}
-
-	correct_df := timecode.NewTimecodeFromString("00:07:00;02", 29.97)
-	e = correct_df.Validate()
-	if e != nil {
-		println(e.Error())
-	}
-
-	fmt.Println("------")
-
-	intc := "00:01:00:24"
-	etcc := timecode.NewTimecodeFromString(intc, 24)
-	etcc.Print()
-	ee := etcc.Validate()
-	if ee != nil {
-		println(ee.Error())
-	} else {
-		println(intc, "is valid")
+	rootCmd.MarkFlagsOneRequired("fps")
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Println(err)
 	}
 
 }
