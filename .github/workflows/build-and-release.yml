@@ -58,4 +58,15 @@ jobs:
           body: "Release version $VERSION"
           draft: false
           prerelease: false
-          files: dist/TimecodeTool
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # or use the default token
+
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/TimecodeTool
+          asset_name: TimecodeTool
+          asset_content_type: application/octet-stream
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # or use the default token
