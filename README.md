@@ -9,9 +9,9 @@
 ## Usage
 
 Modes of operation:
-`TimecodeTool --fps=29.97 "00:07:00;00"` - returns: valid, frame start idx, maayyybeee time from 00:00:00:00?
-`TimecodeTool 23.98 "01:00:00:00" "01:01:00:00"` - returns valid, first frame idx, last frame idx (assuming inclusive), playback time, time span in frames
-`TimecodeTool 23.98 "01:00:00:00" + "00:00:01:00" + 23 - 00:00:00:10` - returns valid, first frame idx, last frame idx (assuming inclusive), time span in frames
+`TimecodeTool validate "00:07:00;00" --fps=29.97` - returns: valid, frame start idx, maayyybeee time from 00:00:00:00?
+`TimecodeTool span "01:00:00:00" "01:01:00:00" --fps=23.98 ` - returns valid, first frame idx, last frame idx (assuming inclusive), playback time, time span in frames
+`TimecodeTool calculate "01:00:00:00" + "00:00:01:00" + 23 - "00:00:00:10" --fps=23.98` - returns valid, first frame idx, last frame idx (assuming inclusive), time span in frames
 
 ## Building
 
