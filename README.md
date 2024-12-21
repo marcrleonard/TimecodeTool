@@ -23,6 +23,5 @@ To build the tool, simply run `go build -o dist/TimecodeTool ./cmd/TimecodeTool/
 
 ## Todo
 
-- Implement backwards 24 hour rollover for DF
 - Create Pretty Text output
 - Create Json Output

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 
 	"TimecodeTool"
@@ -15,6 +14,7 @@ func main() {
 
 	var fps float64
 	var jsonOutput bool
+	var prettyPrintJsonOutput bool
 
 	rootCmd := &cobra.Command{
 		Use:     "TimecodeTool",
@@ -24,20 +24,19 @@ func main() {
 			"TimecodeTool --fps=29.97 [Timecode]\n" +
 				"TimecodeTool --fps=29.97 [First Timecode] [Last Timecode]\n" +
 				"TimecodeTool --fps=29.97 [Timecode] + [Timecode] - [Frames]\n"),
-		Run: func(cmd *cobra.Command, args []string) {
-
-			if len(args) == 0 {
-				cmd.Help()
-				os.Exit(1)
-			} else if len(args) == 1 {
-
-			} else if len(args) == 2 {
-
-			} else {
-
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			// Check the flag dependency
+			if cmd.Flags().Changed("pretty-print") && !cmd.Flags().Changed("json-output") {
+				return fmt.Errorf("the --pretty-print flag requires the --json-output flag to be set")
 			}
+			return nil
 		},
 	}
+
+	rootCmd.PersistentFlags().Float64Var(&fps, "fps", 29.97, "Frame rate of timecodes")
+	rootCmd.PersistentFlags().BoolVar(&jsonOutput, "json-output", false, "Output as JSON")
+	rootCmd.PersistentFlags().BoolVar(&prettyPrintJsonOutput, "pretty-print", false, "Output indented JSON")
+	rootCmd.MarkFlagsOneRequired("fps")
 
 	validateCmd := &cobra.Command{
 		Use:   "validate [flags] [Timecode]",
@@ -56,9 +55,8 @@ func main() {
 			}
 		},
 	}
-	validateCmd.PersistentFlags().Float64Var(&fps, "fps", 29.97, "Frame rate of timecodes")
-	validateCmd.MarkFlagsOneRequired("fps")
 
+	var excludeLastTimecode bool
 	spanCmd := &cobra.Command{
 		Use:   "span [flags] [First Timecode] [Last Timecode]",
 		Short: "Get the information spanning two timecodes",
@@ -71,6 +69,9 @@ func main() {
 
 			firstTc, _ := timecode.NewTimecodeFromString(startTc, fps)
 			lastTimecode, _ := timecode.NewTimecodeFromString(endTc, fps)
+			if excludeLastTimecode {
+				lastTimecode.AddFrames(-1)
+			}
 
 			fmt.Printf("First Timecode: %s (%s)\n", firstTc.GetTimecode(), firstTc.GetValid())
 			fmt.Printf("Last Timecode: %s (%s)\n", lastTimecode.GetTimecode(), lastTimecode.GetValid())
@@ -87,11 +88,10 @@ func main() {
 			)
 		},
 	}
-	spanCmd.PersistentFlags().Float64Var(&fps, "fps", 29.97, "Frame rate of timecodes")
-	spanCmd.MarkFlagsOneRequired("fps")
+	spanCmd.Flags().BoolVarP(&excludeLastTimecode, "exclude-last-timecode", "e", false, `When entering a first timecode and a last timecode, the calculations will be based off the last timecode, minus one frame. This typically make it easier to read and enter timecode. For instance, with this flag set, a span of "00:00:00:00" "00:00:01:00" represents one second.`)
 
 	calcCmd := &cobra.Command{
-		Use:   "calculate",
+		Use:   "calculate --fps=29.97 [First Timecode] + [Timecode] - [frame number]",
 		Short: "Timecode/Frame calculator",
 		Args:  cobra.MinimumNArgs(3),
 		Long: fmt.Sprintf(
@@ -109,7 +109,7 @@ func main() {
 
 				nextTime := args[curIdx+1]
 
-				frames, err := timecode.ParseStringToFrames(nextTime, fps)
+				frames, err := timecode.ParseStringToFrames(nextTime, fps, excludeLastTimecode)
 				if err != nil {
 					return
 				}
@@ -127,14 +127,12 @@ func main() {
 			fmt.Println(firstTc.GetTimecode())
 		},
 	}
-	calcCmd.PersistentFlags().Float64Var(&fps, "fps", 29.97, "Frame rate of timecodes")
-	calcCmd.MarkFlagsOneRequired("fps")
+	calcCmd.Flags().BoolVarP(&excludeLastTimecode, "exclude-last-timecode", "e", false, `When entering a timecode to be added or subtracted, the calculations will be based off the timecode, minus one frame. This typically make it easier to read and enter timecode. For instance, with this flag set `+"`TimecodeTool calculate \"00:00:00:00\" + \"00:00:00:01\" --fps=23.976 -e`"+"will yield `00:00:00:01`")
 
 	rootCmd.AddCommand(validateCmd, spanCmd, calcCmd)
-	rootCmd.Flags().BoolVar(&jsonOutput, "json-output", false, "Output as JSON")
 
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Printf("Error: %w", err)
+		//fmt.Printf("Error: %w", err)
 	}
 
 }

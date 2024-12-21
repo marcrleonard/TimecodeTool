@@ -6,14 +6,17 @@ import (
 	"strconv"
 )
 
-func ParseStringToFrames(in string, fps float64) (int64, error) {
+func ParseStringToFrames(in string, fps float64, excludeLastTimecode bool) (int64, error) {
 	frames, err := strconv.Atoi(in)
 	if err == nil {
 		return int64(frames), nil
 	}
 	tc, err := NewTimecodeFromString(in, fps)
 	if err == nil {
-		return int64(tc.GetFrameIdx()), nil
+		if excludeLastTimecode {
+			return int64(tc.GetFrameIdx()), nil
+		}
+		return int64(tc.GetFrameCount()), nil
 	}
 
 	return 0, fmt.Errorf("Could not parse time of %s", in)

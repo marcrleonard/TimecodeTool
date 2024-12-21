@@ -171,6 +171,10 @@ func (t *Timecode) AddFrames(frames int) {
 
 }
 
+func (t *Timecode) GetFrameCount() int {
+	return t.GetFrameIdx() + 1
+}
+
 func (t *Timecode) GetFrameIdx() int {
 
 	var timeBase int = getTimeBase(t.FrameRate)
