@@ -117,7 +117,7 @@ func NewTimecodeFromString(inputTimecode string, frameRate float64) (*Timecode, 
 	hmsf := strings.Split(inputTimecode, ":")
 
 	if len(hmsf) != 4 {
-		panic("Timecode is malformed. Please format as hh:mm:ss:ff")
+		return nil, fmt.Errorf("Timecode is malformed. Please format as hh:mm:ss:ff")
 	}
 
 	_hours, err := strconv.Atoi(hmsf[0])

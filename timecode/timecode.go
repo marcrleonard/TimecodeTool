@@ -64,7 +64,7 @@ func (t *Timecode) Validate() error {
 	}
 
 	lastAllowedFrame := int(math.Ceil(t.FrameRate)) - 1
-	if t._frames >= int(lastAllowedFrame) {
+	if t._frames > int(lastAllowedFrame) {
 		return fmt.Errorf("Frames cannot be higher than %d", lastAllowedFrame)
 	}
 

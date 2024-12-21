@@ -14,9 +14,9 @@ func ParseStringToFrames(in string, fps float64, excludeLastTimecode bool) (int6
 	tc, err := NewTimecodeFromString(in, fps)
 	if err == nil {
 		if excludeLastTimecode {
-			return int64(tc.GetFrameIdx()), nil
+			return int64(tc.GetFrameCount()) - 1, nil
 		}
-		return int64(tc.GetFrameCount()), nil
+		return int64(tc.GetFrameIdx()), nil
 	}
 
 	return 0, fmt.Errorf("Could not parse time of %s", in)

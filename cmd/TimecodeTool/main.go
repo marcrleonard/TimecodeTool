@@ -1,12 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"strconv"
+	"os"
 
 	"TimecodeTool"
-	"TimecodeTool/timecode"
-
+	"TimecodeTool/handlers"
 	"github.com/spf13/cobra"
 )
 
@@ -46,12 +46,21 @@ func main() {
 			"TimecodeTool validate --fps=29.97 [Timecode]"),
 		Run: func(cmd *cobra.Command, args []string) {
 			startTc := args[0]
-			firstTc, err := timecode.NewTimecodeFromString(startTc, fps)
-			if err != nil {
-				fmt.Printf("Error: %w", err)
-			} else {
-				fmt.Printf("Timecode: %s@%f (%s)\n", startTc, fps, firstTc.GetValid())
+			resp := handlers.TimecodeValidate(startTc, fps)
+			if jsonOutput {
 
+				if prettyPrintJsonOutput {
+					prettyJSON, err := json.MarshalIndent(resp, "", "  ")
+					if err != nil {
+						fmt.Fprintln(os.Stderr, "Error encoding JSON:", err)
+						os.Exit(1)
+					}
+					fmt.Println(string(prettyJSON))
+				} else if err := json.NewEncoder(os.Stdout).Encode(resp); err != nil {
+					panic("Error encoding json")
+				}
+			} else {
+				fmt.Printf("Timecode: %s@%f vaild:%t\n", resp.InputTimecode, resp.InputFps, resp.Valid)
 			}
 		},
 	}
@@ -66,26 +75,7 @@ func main() {
 		Run: func(cmd *cobra.Command, args []string) {
 			startTc := args[0]
 			endTc := args[1]
-
-			firstTc, _ := timecode.NewTimecodeFromString(startTc, fps)
-			lastTimecode, _ := timecode.NewTimecodeFromString(endTc, fps)
-			if excludeLastTimecode {
-				lastTimecode.AddFrames(-1)
-			}
-
-			fmt.Printf("First Timecode: %s (%s)\n", firstTc.GetTimecode(), firstTc.GetValid())
-			fmt.Printf("Last Timecode: %s (%s)\n", lastTimecode.GetTimecode(), lastTimecode.GetValid())
-
-			dfness := "NDF"
-			if lastTimecode.DropFrame {
-				dfness = "DF"
-			}
-			println("Last Timecode Frame Index (0 based):", lastTimecode.GetFrameIdx())
-			fmt.Printf(
-				"Framerate: %s%s\n",
-				strconv.FormatFloat(fps, 'f', -1, 64),
-				dfness,
-			)
+			handlers.TimecodeSpan(startTc, endTc, fps, excludeLastTimecode)
 		},
 	}
 	spanCmd.Flags().BoolVarP(&excludeLastTimecode, "exclude-last-timecode", "e", false, `When entering a first timecode and a last timecode, the calculations will be based off the last timecode, minus one frame. This typically make it easier to read and enter timecode. For instance, with this flag set, a span of "00:00:00:00" "00:00:01:00" represents one second.`)
@@ -97,34 +87,7 @@ func main() {
 		Long: fmt.Sprintf(
 			"TimecodeTool calculate --fps=29.97 [Timecode] + [Last Timecode] - [frame number]"),
 		Run: func(cmd *cobra.Command, args []string) {
-
-			firstTc, _ := timecode.NewTimecodeFromString(args[0], fps)
-			curIdx := 1
-			for {
-				if curIdx >= len(args)-1 {
-					break
-				}
-
-				opperator := args[curIdx]
-
-				nextTime := args[curIdx+1]
-
-				frames, err := timecode.ParseStringToFrames(nextTime, fps, excludeLastTimecode)
-				if err != nil {
-					return
-				}
-
-				switch opperator {
-				case "-":
-					firstTc.AddFrames(int(frames) * -1)
-				case "+":
-					firstTc.AddFrames(int(frames))
-				}
-
-				curIdx += 2
-			}
-
-			fmt.Println(firstTc.GetTimecode())
+			handlers.TimecodeCalculate(args[0], args[1:], fps, excludeLastTimecode)
 		},
 	}
 	calcCmd.Flags().BoolVarP(&excludeLastTimecode, "exclude-last-timecode", "e", false, `When entering a timecode to be added or subtracted, the calculations will be based off the timecode, minus one frame. This typically make it easier to read and enter timecode. For instance, with this flag set `+"`TimecodeTool calculate \"00:00:00:00\" + \"00:00:00:01\" --fps=23.976 -e`"+"will yield `00:00:00:01`")
