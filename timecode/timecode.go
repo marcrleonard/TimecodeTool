@@ -124,11 +124,16 @@ func (t *Timecode) AddFrames(frames int) {
 
 	} else {
 
-		// Do we need the divmod below?
+		newFrames := t._frames + frames
+		if newFrames < 0 {
+			// this means we have rolled over backwards.
 
-		// newFrames := t._frames + frames
-		// print(newFrames, "\n")
-		fq, fr := divmod(int64(t._frames+frames), int64(getTimeBase(t.FrameRate)))
+			// last possible frame
+			lastFrame := (24 * 60 * 60 * getTimeBase(t.FrameRate))
+			newFrames = lastFrame + newFrames
+		}
+
+		fq, fr := divmod(int64(newFrames), int64(getTimeBase(t.FrameRate)))
 		t._frames = int(fr)
 		// fmt.Println(fq, fr)
 

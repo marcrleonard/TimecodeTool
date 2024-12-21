@@ -7,28 +7,32 @@ import (
 	"strings"
 )
 
-func NewTimecodeSpan(startTimecode string, endTimecode string, frameRate float64) TimecodeSpan {
+func NewTimecodeSpan(startTimecode string, endTimecode string, frameRate float64) (*TimecodeSpan, error) {
 
 	if strings.Contains(startTimecode, ";") != strings.Contains(endTimecode, ";") {
-		panic("startTimecode and endTimecode must both be dropframe or non-dropframe.")
+		return nil, fmt.Errorf("startTimecode and endTimecode must both be dropframe or non-dropframe.")
 	}
 
 	s, err := NewTimecodeFromString(startTimecode, frameRate)
+	if err != nil {
+		return nil, err
+	}
 	e, err := NewTimecodeFromString(endTimecode, frameRate)
+	if err != nil {
+		return nil, err
+	}
 
-	_ = err
-
-	return TimecodeSpan{
+	return &TimecodeSpan{
 		StartTimecode: s,
 		EndTimecode:   e,
 		Framerate:     frameRate,
 		Dropframe:     strings.Contains(startTimecode, ";") || strings.Contains(endTimecode, ";"),
-	}
+	}, nil
 }
 
 // TimecodeFromFrames will create a Timecode object for given frames.
 // The only time it will return an error is if DF is specified for a non-DF framerate.
-func TimecodeFromFrames(inputFrameIdx int64, frameRate float64, isDropframe bool) (Timecode, error) {
+func TimecodeFromFrames(inputFrameIdx int64, frameRate float64, isDropframe bool) (*Timecode, error) {
 
 	if isDropframe {
 		//CONVERT A FRAME NUMBER TO DROP FRAME TIMECODE
@@ -80,8 +84,7 @@ func TimecodeFromFrames(inputFrameIdx int64, frameRate float64, isDropframe bool
 		tc_string := formatTimecode(int64(hours), int64(minutes), int64(seconds), int64(frames), true)
 
 		// Fix this deref and deal with the error
-		tcObj, _ := NewTimecodeFromString(tc_string, frameRate)
-		return *tcObj, nil
+		return NewTimecodeFromString(tc_string, frameRate)
 
 	} else {
 
@@ -92,8 +95,7 @@ func TimecodeFromFrames(inputFrameIdx int64, frameRate float64, isDropframe bool
 		tc_string := formatTimecode(hours, minutes, seconds, frames, isDropframe)
 
 		// Fix this deref and deal with the error
-		tcObj, _ := NewTimecodeFromString(tc_string, frameRate)
-		return *tcObj, nil
+		return NewTimecodeFromString(tc_string, frameRate)
 	}
 
 }
