@@ -51,7 +51,6 @@ func (t *Timecode) GetValid() string {
 
 func (t *Timecode) Validate() error {
 	// println("+++")
-
 	if t._hours > 23 {
 		return fmt.Errorf("Hours cannot be higher than 23")
 	}
@@ -114,7 +113,7 @@ func (t *Timecode) AddFrames(frames int) {
 		// todo: investigate why we need this +1
 		newFC := int64(t.GetFrameIdx()) + int64(frames) + 1
 
-		tt := TimecodeFromFrames(newFC, t.FrameRate, t.DropFrame)
+		tt, _ := TimecodeFromFrames(newFC, t.FrameRate, t.DropFrame)
 		t._hours = tt._hours
 		t._mins = tt._mins
 		t._secs = tt._secs

@@ -26,15 +26,10 @@ func NewTimecodeSpan(startTimecode string, endTimecode string, frameRate float64
 	}
 }
 
-func TimecodeFromFrames(inputFrameIdx int64, frameRate float64, isDropframe bool) Timecode {
+// TimecodeFromFrames will create a Timecode object for given frames.
+// The only time it will return an error is if DF is specified for a non-DF framerate.
+func TimecodeFromFrames(inputFrameIdx int64, frameRate float64, isDropframe bool) (Timecode, error) {
 
-	// if inputFrameCount < 1 {
-	// 	panic("Framecount must be >= 1")
-	// }
-
-	// inputFrameIdx := inputFrameCount - 1
-
-	tcObj := Timecode{}
 	if isDropframe {
 		//CONVERT A FRAME NUMBER TO DROP FRAME TIMECODE
 		//Code by David Heidelberger, adapted from Andrew Duncan
@@ -86,7 +81,7 @@ func TimecodeFromFrames(inputFrameIdx int64, frameRate float64, isDropframe bool
 
 		// Fix this deref and deal with the error
 		tcObj, _ := NewTimecodeFromString(tc_string, frameRate)
-		return *tcObj
+		return *tcObj, nil
 
 	} else {
 
@@ -98,10 +93,8 @@ func TimecodeFromFrames(inputFrameIdx int64, frameRate float64, isDropframe bool
 
 		// Fix this deref and deal with the error
 		tcObj, _ := NewTimecodeFromString(tc_string, frameRate)
-		return *tcObj
+		return *tcObj, nil
 	}
-
-	return tcObj
 
 }
 
@@ -112,8 +105,6 @@ func NewTimecodeFromString(inputTimecode string, frameRate float64) (*Timecode, 
 	if len(inputTimecode) != 11 {
 		return nil, fmt.Errorf("Timecode is malformed. Please format as hh:mm:ss:ff")
 	}
-
-	var tc Timecode
 
 	dropFrame := strings.Contains(inputTimecode, ";")
 
@@ -145,13 +136,13 @@ func NewTimecodeFromString(inputTimecode string, frameRate float64) (*Timecode, 
 		panic("Seconds are malformed.")
 	}
 
-	tc._hours = _hours
-	tc._mins = _mins
-	tc._secs = _secs
-	tc._frames = _frames
-	tc._timecode = _timecode
-	tc.FrameRate = frameRate
-	tc.DropFrame = dropFrame
-
-	return &tc, nil
+	return &Timecode{
+		FrameRate: frameRate,
+		DropFrame: dropFrame,
+		_hours:    _hours,
+		_mins:     _mins,
+		_secs:     _secs,
+		_frames:   _frames,
+		_timecode: _timecode,
+	}, nil
 }
