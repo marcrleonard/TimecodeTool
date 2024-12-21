@@ -199,8 +199,6 @@ func (t *Timecode) GetFrameIdx() int {
 		minuteFrames := timeBase * 60             //Number of frames per minute (non-drop)
 		totalMinutes := (60 * t._hours) + t._mins //Total number of minuts
 		frameCount = ((hourFrames * t._hours) + (minuteFrames * t._mins) + (timeBase * t._secs) + t._frames) - (dropFrames * (totalMinutes - (totalMinutes / 10)))
-
-		// frameCount += 1 // is this correct!?
 	}
 
 	return frameCount
