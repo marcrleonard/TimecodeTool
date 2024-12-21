@@ -50,12 +50,12 @@ func TestRolloverForwardsDF(t *testing.T) {
 }
 
 // Not implemented!
-//func TestRolloverBackwardsDF(t *testing.T) {
-//	tc, err := NewTimecodeFromString("00:00:00;00", 29.97)
-//	require.Nil(t, err)
-//	tc.AddFrames(-1)
-//	require.Equal(t, "23:59:59;29", tc.GetTimecode())
-//}
+func TestRolloverBackwardsDF(t *testing.T) {
+	tc, err := NewTimecodeFromString("00:00:00;00", 29.97)
+	require.Nil(t, err)
+	tc.AddFrames(-1)
+	require.Equal(t, "23:59:59;29", tc.GetTimecode())
+}
 
 func TestRolloverForwardsNDF(t *testing.T) {
 	tc, err := NewTimecodeFromString("23:59:59:23", 23.976)

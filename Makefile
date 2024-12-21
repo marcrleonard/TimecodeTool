@@ -11,4 +11,4 @@ test_span:
 	@./TimecodeTool 23.98 "01:00:00:00" "01:01:00:00"
 
 test:
-	@go test ./tests -v
+	@go test ./timecode -v

@@ -111,16 +111,32 @@ func (t *Timecode) Print() {
 func (t *Timecode) AddFrames(frames int) {
 	if t.DropFrame {
 		// todo: investigate why we need this +1
-		newFC := int64(t.GetFrameIdx()) + int64(frames) + 1
+		//  update: I have commented it out, as it seems wrong...
+		newFrames := int64(t.GetFrameIdx()) + int64(frames) //+ 1
 
-		tt, _ := TimecodeFromFrames(newFC, t.FrameRate, t.DropFrame)
+		if newFrames < 0 {
+			// this means we have rolled over backwards.
+
+			// last possible timecode
+			// note: This is calculated slightly different than
+			// for NDF. In our case, its much easier to construct the
+			// last timecode str and then derive the frame versus
+			// calculating the last frame.
+			lastTimecodeStr := fmt.Sprintf("23:59:59;%d", getTimeBase(t.FrameRate)-1)
+			lastTimecode, _ := NewTimecodeFromString(
+				lastTimecodeStr,
+				t.FrameRate,
+			)
+			lastFrame := int64(lastTimecode.GetFrameIdx() + 1)
+			newFrames = lastFrame + newFrames
+		}
+
+		tt, _ := TimecodeFromFrames(newFrames, t.FrameRate, t.DropFrame)
 		t._hours = tt._hours
 		t._mins = tt._mins
 		t._secs = tt._secs
 		t._frames = tt._frames
 		t.DropFrame = tt.DropFrame
-
-		// fmt.Println(t.getTimecode(), tt.getTimecode())
 
 	} else {
 
