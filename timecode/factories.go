@@ -79,8 +79,8 @@ func NewTimecodeFromFrames(inputFrameIdx int64, frameRate float64, isDropframe b
 		sr, frames := divmod(inputFrameIdx, int64(getTimeBase(frameRate)))
 		mr, seconds := divmod(sr, 60)
 		hr, minutes := divmod(mr, 60)
-		hours, _ := divmod(hr, 60)
-		tc_string := formatTimecode(hours, minutes, seconds, frames, isDropframe)
+		//_, _ := divmod(hr, 24)
+		tc_string := formatTimecode(hr, minutes, seconds, frames, isDropframe)
 
 		// Fix this deref and deal with the error
 		return NewTimecodeFromString(tc_string, frameRate)

@@ -151,17 +151,12 @@ func (t *Timecode) AddFrames(frames int) {
 
 		fq, fr := divmod(int64(newFrames), int64(getTimeBase(t.FrameRate)))
 		t._frames = int(fr)
-		// fmt.Println(fq, fr)
 
 		mq, sr := divmod(int64(t._secs)+fq, 60)
 		t._secs = int(sr)
 
-		// fmt.Println(mq, sr)
-
 		hq, mr := divmod(int64(t._mins)+mq, 60)
 		t._mins = int(mr)
-
-		// fmt.Println(hq, mr)
 
 		o, hr := divmod(int64(t._hours)+hq, 24)
 		t._hours = int(hr)

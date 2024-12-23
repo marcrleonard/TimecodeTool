@@ -2,6 +2,7 @@ package timecode
 
 import (
 	"fmt"
+	"math"
 	"strings"
 )
 
@@ -34,27 +35,22 @@ func (t *TimecodeSpan) GetSpanTimecode() string {
 }
 
 func (t *TimecodeSpan) GetSpanRealtime() string {
-	_totalFrames := t.GetTotalFrames()
+	_totalSeconds := t.GetTotalSeconds()
 
-	// TODO: I HAVE NO CLUE IF THIS IS t.Framerate or getTimeBase()
-	_fq, fr := divmod(int64(_totalFrames), int64(t.Framerate))
-	// _fq, fr := divmod(int64(_totalFrames), int64(getTimeBase(t.Framerate)))
+	_sq, _sr := divmod(int64(_totalSeconds), int64(60))
 
-	_mq, sr := divmod(int64(_fq), 60)
-
-	// fmt.Println(mq, sr)
-	_hq, mr := divmod(int64(_mq), 60)
+	_hq, mr := divmod(int64(_sq), 60)
 
 	_o, hr := divmod(int64(_hq), 24)
 
 	_ = _o
 
-	ms := (float64(fr) / float64(t.Framerate))
+	ms := _totalSeconds - math.Floor(_totalSeconds)
 
 	str := fmt.Sprintf("%.3f", ms)
 	// Remove the "0." prefix
 	result := strings.TrimPrefix(str, "0.")
 
-	return formatTimeSpan(int64(hr), int64(mr), int64(sr), result)
+	return formatTimeSpan(int64(hr), int64(mr), int64(_sr), result)
 
 }

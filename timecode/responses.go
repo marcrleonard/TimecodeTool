@@ -138,15 +138,16 @@ func PrettyPrintSpanResponse(response SpanResponse) {
 	// Output based on the validity of the span
 	if response.Valid {
 		fmt.Printf("Valid Span:       ✅ Yes\n")
-		fmt.Printf("Start Frame Index: %d\n", response.StartFrameIdx)
-		fmt.Printf("Last Frame Index:  %d\n", response.LastFrameIdx)
-		fmt.Printf("Length (Frames):  %d\n", response.LengthFrames)
-		fmt.Printf("Length (Time):    %s\n", response.LengthTime)
-		fmt.Printf("Length (Seconds): %.2f\n", response.LengthSeconds)
-		fmt.Printf("Next Timecode:    %s\n", response.NextTimecode)
+		fmt.Printf("Start Frame Index:    %d\n", response.StartFrameIdx)
+		fmt.Printf("Last Frame Index:     %d\n", response.LastFrameIdx)
+		fmt.Printf("Length (Frames):      %d\n", response.LengthFrames)
+		fmt.Printf("Length (Real Time):   %s\n", response.LengthTime)
+		fmt.Printf("Length (Seconds):     %.2f\n", response.LengthSeconds)
+		fmt.Printf("Length (Timecode):    %s\n", response.LengthTimecode)
+		fmt.Printf("Next Timecode:        %s\n", response.NextTimecode)
 	} else {
-		fmt.Printf("Valid Span:       ❌ No\n")
-		fmt.Printf("Error:            %s\n", response.ErrorMsg)
+		fmt.Printf("Valid Span:        ❌ No\n")
+		fmt.Printf("Error:                %s\n", response.ErrorMsg)
 	}
 
 	fmt.Println("─────────────────────────────")
