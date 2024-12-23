@@ -8,8 +8,8 @@ import (
 	"TimecodeTool"
 	"TimecodeTool/handlers"
 	"TimecodeTool/timecode"
-
 	"github.com/invopop/jsonschema"
+
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +23,12 @@ func validateJson(cmd *cobra.Command, args []string) error {
 
 func main() {
 
-	var fps float64
+	var (
+		fps                   float64
+		jsonOutput            bool
+		prettyPrintJsonOutput bool
+		excludeLastTimecode   bool
+	)
 
 	rootCmd := &cobra.Command{
 		Use:     "TimecodeTool",
@@ -36,11 +41,6 @@ func main() {
 		PreRunE: validateJson,
 	}
 
-	rootCmd.PersistentFlags().Float64Var(&fps, "fps", 29.97, "Frame rate of timecodes")
-	rootCmd.MarkFlagsOneRequired("fps")
-
-	var validateJsonOutput bool
-	var validatePrettyPrintJsonOutput bool
 	validateCmd := &cobra.Command{
 		Use:   "validate [flags] [Timecode]",
 		Short: "Validate a timecode",
@@ -51,9 +51,9 @@ func main() {
 		Run: func(cmd *cobra.Command, args []string) {
 			startTc := args[0]
 			resp := handlers.TimecodeValidate(startTc, fps)
-			if validateJsonOutput {
+			if jsonOutput {
 
-				if validatePrettyPrintJsonOutput {
+				if prettyPrintJsonOutput {
 					prettyJSON, err := json.MarshalIndent(resp, "", "  ")
 					if err != nil {
 						fmt.Println(os.Stderr, "Error encoding JSON:", err)
@@ -68,12 +68,11 @@ func main() {
 			}
 		},
 	}
-	validateCmd.Flags().BoolVar(&validateJsonOutput, "json-output", false, "Output as JSON")
-	validateCmd.Flags().BoolVar(&validatePrettyPrintJsonOutput, "pretty-print", false, "Output indented JSON")
+	validateCmd.Flags().BoolVar(&jsonOutput, "json-output", false, "Output as JSON")
+	validateCmd.Flags().BoolVar(&prettyPrintJsonOutput, "pretty-print", false, "Output indented JSON")
+	validateCmd.Flags().Float64Var(&fps, "fps", 29.97, "Frame rate of timecodes")
+	validateCmd.MarkFlagsOneRequired("fps")
 
-	var spanJsonOutput bool
-	var spanPrettyPrintJsonOutput bool
-	var excludeLastTimecode bool
 	spanCmd := &cobra.Command{
 		Use:   "span [flags] [First Timecode] [Last Timecode]",
 		Short: "Get the information spanning two timecodes",
@@ -86,9 +85,9 @@ func main() {
 			endTc := args[1]
 			resp := handlers.NewTimecodeSpan(startTc, endTc, fps, excludeLastTimecode)
 
-			if spanJsonOutput {
+			if jsonOutput {
 
-				if spanPrettyPrintJsonOutput {
+				if prettyPrintJsonOutput {
 					prettyJSON, err := json.MarshalIndent(resp, "", "  ")
 					if err != nil {
 						fmt.Println(os.Stderr, "Error encoding JSON:", err)
@@ -103,12 +102,12 @@ func main() {
 			}
 		},
 	}
-	spanCmd.Flags().BoolVar(&spanJsonOutput, "json-output", false, "Output as JSON")
-	spanCmd.Flags().BoolVar(&spanPrettyPrintJsonOutput, "pretty-print", false, "Output indented JSON")
+	spanCmd.Flags().BoolVar(&jsonOutput, "json-output", false, "Output as JSON")
+	spanCmd.Flags().BoolVar(&prettyPrintJsonOutput, "pretty-print", false, "Output indented JSON")
 	spanCmd.Flags().BoolVarP(&excludeLastTimecode, "exclude-last-timecode", "e", false, `When entering a first timecode and a last timecode, the calculations will be based off the last timecode, minus one frame. This typically make it easier to read and enter timecode. For instance, with this flag set, a span of "00:00:00:00" "00:00:01:00" represents one second.`)
+	spanCmd.Flags().Float64Var(&fps, "fps", 29.97, "Frame rate of timecodes")
+	spanCmd.MarkFlagsOneRequired("fps")
 
-	var calcJsonOutput bool
-	var calcPrettyPrintJsonOutput bool
 	calcCmd := &cobra.Command{
 		Use:     "calculate --fps=29.97 [First Timecode] + [Timecode] - [frame number]",
 		Short:   "Timecode/Frame calculator",
@@ -119,9 +118,9 @@ func main() {
 		Run: func(cmd *cobra.Command, args []string) {
 			resp := handlers.TimecodeCalculate(args[0], args[1:], fps, excludeLastTimecode)
 
-			if spanJsonOutput {
+			if jsonOutput {
 
-				if spanPrettyPrintJsonOutput {
+				if prettyPrintJsonOutput {
 					prettyJSON, err := json.MarshalIndent(resp, "", "  ")
 					if err != nil {
 						fmt.Println(os.Stderr, "Error encoding JSON:", err)
@@ -137,17 +136,21 @@ func main() {
 
 		},
 	}
-	calcCmd.Flags().BoolVar(&calcJsonOutput, "json-output", false, "Output as JSON")
-	calcCmd.Flags().BoolVar(&calcPrettyPrintJsonOutput, "pretty-print", false, "Output indented JSON")
-
+	calcCmd.Flags().BoolVar(&jsonOutput, "json-output", false, "Output as JSON")
+	calcCmd.Flags().BoolVar(&prettyPrintJsonOutput, "pretty-print", false, "Output indented JSON")
 	calcCmd.Flags().BoolVarP(&excludeLastTimecode, "exclude-last-timecode", "e", false, `When entering a timecode to be added or subtracted, the calculations will be based off the timecode, minus one frame. This typically make it easier to read and enter timecode. For instance, with this flag set `+"`TimecodeTool calculate \"00:00:00:00\" + \"00:00:00:01\" --fps=23.976 -e`"+"will yield `00:00:00:01`")
+	calcCmd.Flags().Float64Var(&fps, "fps", 29.97, "Frame rate of timecodes")
+	calcCmd.MarkFlagsOneRequired("fps")
 
 	outputSchema := &cobra.Command{
-		Use:       "schema",
+		Use: "schema [validate|span|calculate]",
+		Long: "Returns a valid json schema that describes the json output of each of the tools in the CLI. Examples:" +
+			"\n  TimecodeTool schema validate" +
+			"\n  TimecodeTool schema span" +
+			"\n  TimecodeTool schema calculate",
 		Args:      cobra.ExactArgs(1), // Expect exactly one argument
 		ValidArgs: []string{"validate", "span", "calculate"},
 		Run: func(cmd *cobra.Command, args []string) {
-
 			var r *jsonschema.Schema
 
 			switch args[0] {
@@ -157,14 +160,18 @@ func main() {
 				r = jsonschema.Reflect(&timecode.SpanResponse{})
 			case "calculate":
 				r = jsonschema.Reflect(&timecode.CalcResponse{})
+			default:
+				// Handle invalid argument, could return an error or show a message
+				fmt.Println(`Invalid argument. Valid options are: "validate", "span", "calculate"`)
+				return
 			}
 
+			// Marshal the schema to JSON with indentation
 			schemaJSON, err := json.MarshalIndent(r, "", "  ")
 			if err != nil {
 				panic(err)
-				return
 			}
-			// Output the JSON Schema.
+			// Output the JSON Schema
 			fmt.Println(string(schemaJSON))
 		},
 	}

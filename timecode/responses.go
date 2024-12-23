@@ -242,7 +242,7 @@ func PrettyPrintCalculateResponse(resp CalcResponse) {
 	printSeparator()
 
 	// Starting timecode and frames
-	fmt.Printf(" 🎬 Starting Timecode:   %s (Index %d)\n", resp.InputFirstTimecode, resp.StartFrameIdx)
+	fmt.Printf(" 🎬 Starting Timecode:      %s (Index %d)\n", resp.InputFirstTimecode, resp.StartFrameIdx)
 
 	// Process each step
 	for _, step := range steps {
@@ -255,19 +255,7 @@ func PrettyPrintCalculateResponse(resp CalcResponse) {
 
 	// Resulting timecode and frames
 	printSeparator()
-	fmt.Printf(" ✅  Resulting Timecode:     %s (%d total frames)\n", resp.LastTimecode, resp.LengthFrames)
-
-	// Summary
-	printSeparator()
-	fmt.Println("Details:")
-	fmt.Printf(" 🟢 Start Index:      %d\n", resp.StartFrameIdx)
-	for _, step := range steps {
-		if step.Operation == "+" {
-			fmt.Printf(" ➕ %d\n", step.Frames)
-		} else if step.Operation == "-" {
-			fmt.Printf(" ➖ %d\n", step.Frames)
-		}
-	}
-	fmt.Printf(" 🔵 Last Index:     %d\n", resp.LastFrameIdx)
+	fmt.Printf(" 🟰  Resulting Timecode:    %s (%d total frames)\n", resp.LastTimecode, resp.LengthFrames)
+	fmt.Printf("%d ➡️ %d frame indexes\n", resp.StartFrameIdx, resp.LastFrameIdx)
 	printSeparator()
 }

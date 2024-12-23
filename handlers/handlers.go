@@ -74,7 +74,6 @@ func NewTimecodeSpan(startTc string, endTc string, fps float64, excludeLastTimec
 		span.GetTotalSeconds(),
 		nextTimecode.GetTimecode(),
 	)
-	//return &timecode.SpanResponse{}
 }
 
 func TimecodeCalculate(inTc string, operations []string, fps float64, excludeLastTimecode bool) *timecode.CalcResponse {
@@ -93,7 +92,7 @@ func TimecodeCalculate(inTc string, operations []string, fps float64, excludeLas
 
 		nextTime := operations[curIdx+1]
 
-		nexTc, err := timecode.ParseStringToTimcode(nextTime, fps, excludeLastTimecode, firstTc.DropFrame)
+		nexTc, err := timecode.ParseStringToTimecode(nextTime, fps, excludeLastTimecode, firstTc.DropFrame)
 
 		if err != nil {
 			return timecode.NewFailedCalcResponse(
