@@ -12,7 +12,7 @@ type ValidateResponse struct {
 }
 type SpanResponse struct {
 	InputFirstTimecode  string  `json:"inputFirstTimecode"`
-	InputLastTimecode   string  `json:"inputLastTimecode"`
+	InputLastTimecode   string  `json:"inputLastTimecode,omitempty"`
 	InputFps            float64 `json:"inputFps"`
 	Valid               bool    `json:"valid"`
 	ErrorMsg            string  `json:"errorMsg"`
@@ -26,7 +26,82 @@ type SpanResponse struct {
 	LengthSeconds       float64 `json:"lengthSeconds"`
 	NextTimecode        string  `json:"nextTimecode"`
 }
+
+type CalculationStep struct {
+	Operation string `json:"operation"` // "+" or "-"
+	Timecode  string `json:"timecode"`  // Timecode for the operation
+	Frames    int    `json:"frames"`    // Equivalent frames for the operation
+}
+
 type CalcResponse struct {
+	SpanResponse
+	LastTimecode string `json:"lastTimecode"`
+	Steps        []CalculationStep
+}
+
+// NewOkCalcResponse creates a new successful CalcResponse with steps
+func NewOkCalcResponse(
+	InputFirstTimecode string,
+	LastTimecode string,
+	InputFps float64,
+	IsDf bool,
+	ExcludeLastTimecode bool,
+	StartFrameIdx int,
+	LastFrameIdx int,
+	LengthFrames int,
+	LengthTime string,
+	LengthTimecode string,
+	LengthSeconds float64,
+	NextTimecode string,
+	Steps []CalculationStep) *CalcResponse {
+
+	// Create the SpanResponse part of the CalcResponse
+	spanResponse := NewOkSpanResponse(
+		InputFirstTimecode,
+		"",
+		InputFps,
+		IsDf,
+		ExcludeLastTimecode,
+		StartFrameIdx,
+		LastFrameIdx,
+		LengthFrames,
+		LengthTime,
+		LengthTimecode,
+		LengthSeconds,
+		NextTimecode,
+	)
+
+	// Return the CalcResponse with the embedded SpanResponse and the steps
+	return &CalcResponse{
+		LastTimecode: LastTimecode,
+		SpanResponse: *spanResponse, // Unwrap the SpanResponse pointer
+		Steps:        Steps,
+	}
+}
+
+// NewFailedCalcResponse creates a new failed CalcResponse with an error message
+func NewFailedCalcResponse(
+	InputFirstTimecode string,
+	InputLastTimecode string,
+	InputFps float64,
+	ExcludeLastTimecode bool,
+	ErrorMsg string,
+	Steps []CalculationStep) *CalcResponse {
+
+	// Create the failed SpanResponse part
+	spanResponse := NewFailedSpanResponse(
+		InputFirstTimecode,
+		InputLastTimecode,
+		InputFps,
+		ExcludeLastTimecode,
+		ErrorMsg,
+	)
+
+	// Return the CalcResponse with the embedded SpanResponse and the steps
+	return &CalcResponse{
+		SpanResponse: *spanResponse, // Unwrap the SpanResponse pointer
+		Steps:        Steps,
+	}
 }
 
 func NewOkValidateResponse(InputTimecode string, InputFps float64, IsDf bool, NextTimecode string) *ValidateResponse {
@@ -95,10 +170,16 @@ func NewFailedSpanResponse(
 	}
 }
 
+func printSeparator() {
+	fmt.Println("─────────────────────────────")
+}
+
+const title = "🎥 TimecodeTool"
+
 // prettyPrint displays the timecode validation results in a user-friendly format
 func PrettyPrint(response *ValidateResponse) {
-	fmt.Println("🎥 Timecode Validation Tool")
-	fmt.Println("─────────────────────────────")
+	fmt.Println(title + " Validate")
+	printSeparator()
 	fmt.Printf("Input Timecode:   %s\n", response.InputTimecode)
 	fmt.Printf("Frame Rate (FPS): %.2f\n", response.InputFps)
 
@@ -114,13 +195,13 @@ func PrettyPrint(response *ValidateResponse) {
 		fmt.Printf("Error:            %s\n", response.ErrorMsg)
 	}
 
-	fmt.Println("─────────────────────────────")
+	printSeparator()
 }
 
 // prettyPrintSpanResponse displays the span command results in a user-friendly format
 func PrettyPrintSpanResponse(response SpanResponse) {
-	fmt.Println("🎥 Timecode Span Tool")
-	fmt.Println("─────────────────────────────")
+	fmt.Println(title + " Span")
+	printSeparator()
 
 	// Helper function to handle invalid timecodes
 	printInvalidTimecode := func(timecode string) string {
@@ -150,5 +231,43 @@ func PrettyPrintSpanResponse(response SpanResponse) {
 		fmt.Printf("Error:                %s\n", response.ErrorMsg)
 	}
 
-	fmt.Println("─────────────────────────────")
+	printSeparator()
+}
+
+func PrettyPrintCalculateResponse(resp CalcResponse) {
+
+	steps := resp.Steps
+
+	fmt.Println(title + " Calculate")
+	printSeparator()
+
+	// Starting timecode and frames
+	fmt.Printf(" 🎬 Starting Timecode:   %s (Index %d)\n", resp.InputFirstTimecode, resp.StartFrameIdx)
+
+	// Process each step
+	for _, step := range steps {
+		if step.Operation == "+" {
+			fmt.Printf("   ➕  Add Timecode:         %s (%d frames)\n", step.Timecode, step.Frames)
+		} else if step.Operation == "-" {
+			fmt.Printf("   ➖  Sub Timecode:         %s (%d frames)\n", step.Timecode, step.Frames)
+		}
+	}
+
+	// Resulting timecode and frames
+	printSeparator()
+	fmt.Printf(" ✅  Resulting Timecode:     %s (%d total frames)\n", resp.LastTimecode, resp.LengthFrames)
+
+	// Summary
+	printSeparator()
+	fmt.Println("Details:")
+	fmt.Printf(" 🟢 Start Index:      %d\n", resp.StartFrameIdx)
+	for _, step := range steps {
+		if step.Operation == "+" {
+			fmt.Printf(" ➕ %d\n", step.Frames)
+		} else if step.Operation == "-" {
+			fmt.Printf(" ➖ %d\n", step.Frames)
+		}
+	}
+	fmt.Printf(" 🔵 Last Index:     %d\n", resp.LastFrameIdx)
+	printSeparator()
 }

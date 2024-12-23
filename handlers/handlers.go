@@ -77,9 +77,13 @@ func NewTimecodeSpan(startTc string, endTc string, fps float64, excludeLastTimec
 	//return &timecode.SpanResponse{}
 }
 
-func TimecodeCalculate(inTc string, operations []string, fps float64, excludeLastTimecode bool) {
+func TimecodeCalculate(inTc string, operations []string, fps float64, excludeLastTimecode bool) *timecode.CalcResponse {
 	firstTc, _ := timecode.NewTimecodeFromString(inTc, fps)
+	lastTimecode, _ := timecode.NewTimecodeFromString(inTc, fps)
 	curIdx := 0
+
+	calcSteps := []timecode.CalculationStep{}
+
 	for {
 		if curIdx >= len(operations)-1 {
 			break
@@ -89,20 +93,51 @@ func TimecodeCalculate(inTc string, operations []string, fps float64, excludeLas
 
 		nextTime := operations[curIdx+1]
 
-		frames, err := timecode.ParseStringToFrames(nextTime, fps, excludeLastTimecode)
+		nexTc, err := timecode.ParseStringToTimcode(nextTime, fps, excludeLastTimecode, firstTc.DropFrame)
+
 		if err != nil {
-			return
+			return timecode.NewFailedCalcResponse(
+				inTc,
+				"",
+				fps,
+				excludeLastTimecode,
+				err.Error(),
+				[]timecode.CalculationStep{},
+			)
 		}
 
 		switch opperator {
 		case "-":
-			firstTc.AddFrames(int(frames) * -1)
+			lastTimecode.AddFrames(int(nexTc.GetFrameCount()) * -1)
 		case "+":
-			firstTc.AddFrames(int(frames))
+			lastTimecode.AddFrames(int(nexTc.GetFrameCount()))
 		}
+
+		calcSteps = append(calcSteps, timecode.CalculationStep{
+			Operation: opperator,
+			Timecode:  nexTc.GetTimecode(), // fix this
+			Frames:    int(nexTc.GetFrameCount()),
+		})
 
 		curIdx += 2
 	}
 
-	fmt.Println(firstTc.GetTimecode())
+	span := NewTimecodeSpan(inTc, lastTimecode.GetTimecode(), fps, excludeLastTimecode)
+
+	return timecode.NewOkCalcResponse(
+		firstTc.GetTimecode(),
+		lastTimecode.GetTimecode(),
+		fps,
+		firstTc.DropFrame,
+		excludeLastTimecode,
+		firstTc.GetFrameIdx(),
+		lastTimecode.GetFrameIdx(),
+		span.LengthFrames,
+		span.LengthTime,
+		span.LengthTimecode,
+		span.LengthSeconds,
+		span.NextTimecode,
+		calcSteps,
+	)
+
 }

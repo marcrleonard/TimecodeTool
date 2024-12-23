@@ -6,20 +6,22 @@ import (
 	"strconv"
 )
 
-func ParseStringToFrames(in string, fps float64, excludeLastTimecode bool) (int64, error) {
+// ParseStringToTimcode Will take a string that is either a timecode string or a frame count string
+// and return a bonefied timecode object. This is only used in the context of calculate
+// where we know if it's df or ndf. This dropframeness is ignored if it's a timecode string
+func ParseStringToTimcode(in string, fps float64, excludeLastTimecode bool, dropFrame bool) (*Timecode, error) {
 	frames, err := strconv.Atoi(in)
 	if err == nil {
-		return int64(frames), nil
-	}
-	tc, err := NewTimecodeFromString(in, fps)
-	if err == nil {
 		if excludeLastTimecode {
-			return int64(tc.GetFrameCount()) - 1, nil
+			frames = frames - 1
 		}
-		return int64(tc.GetFrameIdx()), nil
+		return NewTimecodeFromFrames(int64(frames), fps, dropFrame)
 	}
-
-	return 0, fmt.Errorf("Could not parse time of %s", in)
+	time, err := NewTimecodeFromString(in, fps)
+	if excludeLastTimecode && err == nil {
+		time.AddFrames(-1)
+	}
+	return time, err
 }
 
 func divmod(numerator, denominator int64) (quotient, remainder int64) {
