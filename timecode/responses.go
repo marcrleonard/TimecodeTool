@@ -1,5 +1,7 @@
 package timecode
 
+import "fmt"
+
 type ValidateResponse struct {
 	InputTimecode string  `json:"inputTimecode"`
 	InputFps      float64 `json:"inputFps"`
@@ -91,4 +93,61 @@ func NewFailedSpanResponse(
 		ErrorMsg:            ErrorMsg,
 		ExcludeLastTimecode: ExcludeLastTimecode,
 	}
+}
+
+// prettyPrint displays the timecode validation results in a user-friendly format
+func PrettyPrint(response *ValidateResponse) {
+	fmt.Println("🎥 Timecode Validation Tool")
+	fmt.Println("─────────────────────────────")
+	fmt.Printf("Input Timecode:   %s\n", response.InputTimecode)
+	fmt.Printf("Frame Rate (FPS): %.2f\n", response.InputFps)
+
+	if response.Valid {
+		dfIndicator := ""
+		if response.IsDf {
+			dfIndicator = " (Drop Frame)"
+		}
+		fmt.Printf("Valid Timecode:   ✅ Yes%s\n", dfIndicator)
+		fmt.Printf("Next Timecode:    %s\n", response.NextTimecode)
+	} else {
+		fmt.Printf("Valid Timecode:   ❌ No\n")
+		fmt.Printf("Error:            %s\n", response.ErrorMsg)
+	}
+
+	fmt.Println("─────────────────────────────")
+}
+
+// prettyPrintSpanResponse displays the span command results in a user-friendly format
+func PrettyPrintSpanResponse(response SpanResponse) {
+	fmt.Println("🎥 Timecode Span Tool")
+	fmt.Println("─────────────────────────────")
+
+	// Helper function to handle invalid timecodes
+	printInvalidTimecode := func(timecode string) string {
+		if timecode == "" {
+			return "❌ Invalid (Empty)"
+		}
+		return timecode
+	}
+
+	// Print First and Last Timecodes
+	fmt.Printf("First Timecode:   %s\n", printInvalidTimecode(response.InputFirstTimecode))
+	fmt.Printf("Last Timecode:    %s\n", printInvalidTimecode(response.InputLastTimecode))
+	fmt.Printf("Frame Rate (FPS): %.2f\n", response.InputFps)
+
+	// Output based on the validity of the span
+	if response.Valid {
+		fmt.Printf("Valid Span:       ✅ Yes\n")
+		fmt.Printf("Start Frame Index: %d\n", response.StartFrameIdx)
+		fmt.Printf("Last Frame Index:  %d\n", response.LastFrameIdx)
+		fmt.Printf("Length (Frames):  %d\n", response.LengthFrames)
+		fmt.Printf("Length (Time):    %s\n", response.LengthTime)
+		fmt.Printf("Length (Seconds): %.2f\n", response.LengthSeconds)
+		fmt.Printf("Next Timecode:    %s\n", response.NextTimecode)
+	} else {
+		fmt.Printf("Valid Span:       ❌ No\n")
+		fmt.Printf("Error:            %s\n", response.ErrorMsg)
+	}
+
+	fmt.Println("─────────────────────────────")
 }

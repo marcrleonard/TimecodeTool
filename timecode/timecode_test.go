@@ -11,7 +11,7 @@ import (
 // for a valid return value.
 func TestNDFIndexes(t *testing.T) {
 
-	tc, _ := TimecodeFromFrames(0, 23.98, false)
+	tc, _ := NewTimecodeFromFrames(0, 23.98, false)
 	if tc.GetFrameIdx() != 0 {
 		t.Fatalf(`%v != 0`, tc.GetFrameIdx())
 	}
@@ -20,7 +20,7 @@ func TestNDFIndexes(t *testing.T) {
 
 func TestAddNDFIndexes(t *testing.T) {
 
-	tc, _ := TimecodeFromFrames(0, 23.98, false)
+	tc, _ := NewTimecodeFromFrames(0, 23.98, false)
 	tc.AddFrames(1)
 	if tc.GetFrameIdx() != 1 {
 		t.Fatalf(`%v != 1`, tc.GetFrameIdx())
@@ -35,7 +35,7 @@ func TestAddNDFIndexes(t *testing.T) {
 
 func TestDFIndexes(t *testing.T) {
 
-	tcdf, _ := TimecodeFromFrames(0, 29.97, true)
+	tcdf, _ := NewTimecodeFromFrames(0, 29.97, true)
 
 	if tcdf.GetFrameIdx() != 0 {
 		t.Fatalf(`%v != 0`, tcdf.GetFrameIdx())

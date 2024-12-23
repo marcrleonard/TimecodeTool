@@ -7,6 +7,9 @@ import (
 
 	"TimecodeTool"
 	"TimecodeTool/handlers"
+	"TimecodeTool/timecode"
+
+	"github.com/invopop/jsonschema"
 	"github.com/spf13/cobra"
 )
 
@@ -52,7 +55,7 @@ func main() {
 				if prettyPrintJsonOutput {
 					prettyJSON, err := json.MarshalIndent(resp, "", "  ")
 					if err != nil {
-						fmt.Fprintln(os.Stderr, "Error encoding JSON:", err)
+						fmt.Println(os.Stderr, "Error encoding JSON:", err)
 						os.Exit(1)
 					}
 					fmt.Println(string(prettyJSON))
@@ -60,7 +63,7 @@ func main() {
 					panic("Error encoding json")
 				}
 			} else {
-				fmt.Printf("Timecode: %s@%f vaild:%t\n", resp.InputTimecode, resp.InputFps, resp.Valid)
+				timecode.PrettyPrint(resp)
 			}
 		},
 	}
@@ -75,7 +78,23 @@ func main() {
 		Run: func(cmd *cobra.Command, args []string) {
 			startTc := args[0]
 			endTc := args[1]
-			handlers.TimecodeSpan(startTc, endTc, fps, excludeLastTimecode)
+			resp := handlers.NewTimecodeSpan(startTc, endTc, fps, excludeLastTimecode)
+
+			if jsonOutput {
+
+				if prettyPrintJsonOutput {
+					prettyJSON, err := json.MarshalIndent(resp, "", "  ")
+					if err != nil {
+						fmt.Println(os.Stderr, "Error encoding JSON:", err)
+						os.Exit(1)
+					}
+					fmt.Println(string(prettyJSON))
+				} else if err := json.NewEncoder(os.Stdout).Encode(resp); err != nil {
+					panic("Error encoding json")
+				}
+			} else {
+				timecode.PrettyPrintSpanResponse(*resp)
+			}
 		},
 	}
 	spanCmd.Flags().BoolVarP(&excludeLastTimecode, "exclude-last-timecode", "e", false, `When entering a first timecode and a last timecode, the calculations will be based off the last timecode, minus one frame. This typically make it easier to read and enter timecode. For instance, with this flag set, a span of "00:00:00:00" "00:00:01:00" represents one second.`)
@@ -92,7 +111,29 @@ func main() {
 	}
 	calcCmd.Flags().BoolVarP(&excludeLastTimecode, "exclude-last-timecode", "e", false, `When entering a timecode to be added or subtracted, the calculations will be based off the timecode, minus one frame. This typically make it easier to read and enter timecode. For instance, with this flag set `+"`TimecodeTool calculate \"00:00:00:00\" + \"00:00:00:01\" --fps=23.976 -e`"+"will yield `00:00:00:01`")
 
-	rootCmd.AddCommand(validateCmd, spanCmd, calcCmd)
+	outputSchema := &cobra.Command{
+		Use:       "schema",
+		Args:      cobra.ExactArgs(1), // Expect exactly one argument
+		ValidArgs: []string{"validate", "span", "calculate"},
+		Run: func(cmd *cobra.Command, args []string) {
+			switch args[0] {
+			case "validate":
+				r := jsonschema.Reflect(&timecode.ValidateResponse{})
+
+				// Convert to JSON for printing.
+				schemaJSON, err := json.MarshalIndent(r, "", "  ")
+				if err != nil {
+					fmt.Println("Error:", err)
+					return
+				}
+
+				// Output the JSON Schema.
+				fmt.Println(string(schemaJSON))
+			}
+		},
+	}
+
+	rootCmd.AddCommand(validateCmd, spanCmd, calcCmd, outputSchema)
 
 	if err := rootCmd.Execute(); err != nil {
 		//fmt.Printf("Error: %w", err)

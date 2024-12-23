@@ -91,7 +91,7 @@ func (t *Timecode) Validate() error {
 			}
 
 			if !valid {
-				return fmt.Errorf("%s is not a valid timecode.", t._timecode)
+				return fmt.Errorf("%s is valid timecode for drop frame.", t._timecode)
 			}
 
 		}
@@ -131,7 +131,7 @@ func (t *Timecode) AddFrames(frames int) {
 			newFrames = lastFrame + newFrames
 		}
 
-		tt, _ := TimecodeFromFrames(newFrames, t.FrameRate, t.DropFrame)
+		tt, _ := NewTimecodeFromFrames(newFrames, t.FrameRate, t.DropFrame)
 		t._hours = tt._hours
 		t._mins = tt._mins
 		t._secs = tt._secs

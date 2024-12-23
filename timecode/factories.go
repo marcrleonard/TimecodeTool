@@ -3,36 +3,24 @@ package timecode
 import (
 	"fmt"
 	"math"
+	"regexp"
 	"strconv"
 	"strings"
 )
 
-func NewTimecodeSpan(startTimecode string, endTimecode string, frameRate float64) (*TimecodeSpan, error) {
-
-	if strings.Contains(startTimecode, ";") != strings.Contains(endTimecode, ";") {
-		return nil, fmt.Errorf("startTimecode and endTimecode must both be dropframe or non-dropframe.")
-	}
-
-	s, err := NewTimecodeFromString(startTimecode, frameRate)
-	if err != nil {
-		return nil, err
-	}
-	e, err := NewTimecodeFromString(endTimecode, frameRate)
-	if err != nil {
-		return nil, err
-	}
+func NewTimecodeSpan(firstTimecode, lastTimecode *Timecode) (*TimecodeSpan, error) {
 
 	return &TimecodeSpan{
-		StartTimecode: s,
-		EndTimecode:   e,
-		Framerate:     frameRate,
-		Dropframe:     strings.Contains(startTimecode, ";") || strings.Contains(endTimecode, ";"),
+		StartTimecode: firstTimecode,
+		LastTimecode:  lastTimecode,
+		Framerate:     firstTimecode.FrameRate,
+		Dropframe:     firstTimecode.DropFrame,
 	}, nil
 }
 
-// TimecodeFromFrames will create a Timecode object for given frames.
+// NewTimecodeFromFrames will create a Timecode object for given frames.
 // The only time it will return an error is if DF is specified for a non-DF framerate.
-func TimecodeFromFrames(inputFrameIdx int64, frameRate float64, isDropframe bool) (*Timecode, error) {
+func NewTimecodeFromFrames(inputFrameIdx int64, frameRate float64, isDropframe bool) (*Timecode, error) {
 
 	if isDropframe {
 		//CONVERT A FRAME NUMBER TO DROP FRAME TIMECODE
@@ -104,21 +92,17 @@ func NewTimecodeFromString(inputTimecode string, frameRate float64) (*Timecode, 
 
 	_timecode := inputTimecode
 
-	if len(inputTimecode) != 11 {
-		return nil, fmt.Errorf("Timecode is malformed. Please format as hh:mm:ss:ff")
+	re := regexp.MustCompile(`^([0-9]{2}):([0-5][0-9]):([0-5][0-9])[;:]([0-9]{2})$`)
+
+	if !re.MatchString(inputTimecode) {
+		return nil, fmt.Errorf("Timecode is malformed. Please format as hh:mm:ss:ff or hh:mm:ss;ff")
 	}
 
 	dropFrame := strings.Contains(inputTimecode, ";")
 
-	if dropFrame {
-		inputTimecode = strings.Replace(inputTimecode, ";", ":", -1)
-	}
+	inputTimecode = strings.Replace(inputTimecode, ";", ":", -1)
 
 	hmsf := strings.Split(inputTimecode, ":")
-
-	if len(hmsf) != 4 {
-		return nil, fmt.Errorf("Timecode is malformed. Please format as hh:mm:ss:ff")
-	}
 
 	_hours, err := strconv.Atoi(hmsf[0])
 	if err != nil {

@@ -7,29 +7,30 @@ import (
 
 type TimecodeSpan struct {
 	StartTimecode *Timecode
-	EndTimecode   *Timecode
+	LastTimecode  *Timecode
 	Framerate     float64
 	Dropframe     bool
 }
 
-func (t *TimecodeSpan) GetTotalFrames() int {
-	tf := t.EndTimecode.GetFrameIdx() - t.StartTimecode.GetFrameIdx() + 1
-	//	return int(math.Max(float64(tf), 1))
+// TOdo: This calc appears to be wrong
+func (t *TimecodeSpan) GetTotalSeconds() float64 {
+	tf := t.GetTotalFrames()
 
+	return float64(tf) / t.Framerate
+}
+
+// todo: note these two heavily rely on the fact that there is at
+//
+//	least one frame in the span (see +1)
+
+func (t *TimecodeSpan) GetTotalFrames() int {
+	tf := t.LastTimecode.GetFrameIdx() - t.StartTimecode.GetFrameIdx() + 1
 	return tf
 }
 
 func (t *TimecodeSpan) GetSpanTimecode() string {
-	_t := Timecode{}
-	_t.DropFrame = t.Dropframe
-	_t._hours = 0
-	_t._mins = 0
-	_t._secs = 0
-	_t._frames = 0
-	_t.AddFrames(t.GetTotalFrames())
-
+	_t, _ := NewTimecodeFromFrames(int64(t.GetTotalFrames()), t.Framerate, t.Dropframe)
 	return _t.GetTimecode()
-
 }
 
 func (t *TimecodeSpan) GetSpanRealtime() string {

@@ -1,8 +1,8 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
-	"strconv"
 
 	"TimecodeTool/timecode"
 )
@@ -24,27 +24,57 @@ func TimecodeValidate(startTc string, fps float64) *timecode.ValidateResponse {
 
 }
 
-func TimecodeSpan(startTc string, endTc string, fps float64, excludeLastTimecode bool) {
+func NewTimecodeSpan(startTc string, endTc string, fps float64, excludeLastTimecode bool) *timecode.SpanResponse {
 
-	firstTc, _ := timecode.NewTimecodeFromString(startTc, fps)
-	lastTimecode, _ := timecode.NewTimecodeFromString(endTc, fps)
-	if excludeLastTimecode {
-		lastTimecode.AddFrames(-1)
+	var allErrors []error
+
+	firstTc, err := timecode.NewTimecodeFromString(startTc, fps)
+	if err != nil {
+		allErrors = append(allErrors, fmt.Errorf("First timecode error: %w", err))
+	}
+	lastTimecode, err := timecode.NewTimecodeFromString(endTc, fps)
+	if err != nil {
+		allErrors = append(allErrors, fmt.Errorf("Last timecode error: %w", err))
 	}
 
-	fmt.Printf("First Timecode: %s (%s)\n", firstTc.GetTimecode(), firstTc.GetValid())
-	fmt.Printf("Last Timecode: %s (%s)\n", lastTimecode.GetTimecode(), lastTimecode.GetValid())
-
-	dfness := "NDF"
-	if lastTimecode.DropFrame {
-		dfness = "DF"
+	if err := firstTc.Validate(); err != nil {
+		allErrors = append(allErrors, err)
 	}
-	println("Last Timecode Frame Index (0 based):", lastTimecode.GetFrameIdx())
-	fmt.Printf(
-		"Framerate: %s%s\n",
-		strconv.FormatFloat(fps, 'f', -1, 64),
-		dfness,
+
+	if err := lastTimecode.Validate(); err != nil {
+		allErrors = append(allErrors, err)
+	}
+
+	if len(allErrors) > 0 {
+		return timecode.NewFailedSpanResponse(startTc, endTc, fps, excludeLastTimecode, errors.Join(allErrors...).Error())
+	}
+
+	span, err := timecode.NewTimecodeSpan(firstTc, lastTimecode)
+	if err != nil {
+		return timecode.NewFailedSpanResponse(startTc, endTc, fps, excludeLastTimecode, err.Error())
+	}
+
+	nextTimecode, err := timecode.NewTimecodeFromString(endTc, fps)
+	if err != nil {
+		panic("Error generating next timecode")
+	}
+	nextTimecode.AddFrames(1)
+
+	return timecode.NewOkSpanResponse(
+		startTc,
+		endTc,
+		fps,
+		span.Dropframe,
+		excludeLastTimecode,
+		span.StartTimecode.GetFrameIdx(),
+		span.LastTimecode.GetFrameIdx(),
+		span.GetTotalFrames(),
+		span.GetSpanRealtime(),
+		span.GetSpanTimecode(),
+		span.GetTotalSeconds(),
+		nextTimecode.GetTimecode(),
 	)
+	//return &timecode.SpanResponse{}
 }
 
 func TimecodeCalculate(inTc string, operations []string, fps float64, excludeLastTimecode bool) {
