@@ -116,20 +116,25 @@ func main() {
 		Args:      cobra.ExactArgs(1), // Expect exactly one argument
 		ValidArgs: []string{"validate", "span", "calculate"},
 		Run: func(cmd *cobra.Command, args []string) {
+
+			var r *jsonschema.Schema
+
 			switch args[0] {
 			case "validate":
-				r := jsonschema.Reflect(&timecode.ValidateResponse{})
-
-				// Convert to JSON for printing.
-				schemaJSON, err := json.MarshalIndent(r, "", "  ")
-				if err != nil {
-					fmt.Println("Error:", err)
-					return
-				}
-
-				// Output the JSON Schema.
-				fmt.Println(string(schemaJSON))
+				r = jsonschema.Reflect(&timecode.ValidateResponse{})
+			case "span":
+				r = jsonschema.Reflect(&timecode.SpanResponse{})
+			case "calculate":
+				r = jsonschema.Reflect(&timecode.CalcResponse{})
 			}
+
+			schemaJSON, err := json.MarshalIndent(r, "", "  ")
+			if err != nil {
+				panic(err)
+				return
+			}
+			// Output the JSON Schema.
+			fmt.Println(string(schemaJSON))
 		},
 	}
 
