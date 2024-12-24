@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timecode Input</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        label, input {
+            font-size: 18px;
+            padding: 8px;
+        }
+
+        input {
+            width: 200px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<h1>Timecode Input (Auto Mask)</h1>
+
+<label for="timecodeInput">Enter Timecode:</label>
+<input type="text" id="timecodeInput" placeholder="00:00:00;00" maxlength="11" />
+
+<button onclick="validateTimecode()">Validate</button>
+<p id="output"></p>
+
+<script>
+    // Automatically insert delimiters as user types (input mask)
+    document.getElementById("timecodeInput").addEventListener("input", function(event) {
+        let input = event.target.value.replace(/[^0-9]/g, ""); // Remove non-numeric characters
+        let formatted = "";
+
+        // Format the input by inserting delimiters
+        if (input.length > 2) {
+            formatted += input.substring(0, 2) + ":";
+            input = input.substring(2);
+        }
+        if (input.length > 2) {
+            formatted += input.substring(0, 2) + ":";
+            input = input.substring(2);
+        }
+        if (input.length > 2) {
+            formatted += input.substring(0, 2) + ";";
+            input = input.substring(2);
+        }
+        if (input.length > 2) {
+            formatted += input.substring(0, 2);
+            input = input.substring(2);
+        }
+
+        formatted += input;
+
+        // Add placeholder formatting if input is empty
+        if (event.target.value === "") {
+            formatted = "00:00:00:00";
+        }
+
+        // Set the formatted value in the input box
+        event.target.value = formatted;
+    });
+
+    // Validate the timecode format
+    function validateTimecode() {
+        const input = document.getElementById("timecodeInput").value;
+        const regex = /^(\d{2}):(\d{2}):(\d{2}):(\d{2})$/;
+
+        // Validate the timecode format
+        if (regex.test(input)) {
+            document.getElementById("output").innerText = `Valid timecode: ${input}`;
+        } else {
+            document.getElementById("output").innerText = "Invalid timecode format. Use hh:mm:ss:ff.";
+        }
+    }
+</script>
+
+<script src="wasm_exec.js"></script> <!-- Include the wasm_exec.js file -->
+<script>
+    // Initialize the Go runtime
+    const go = new Go();
+
+    // Load the WebAssembly module
+    WebAssembly.instantiateStreaming(fetch("timecodetool.wasm"), go.importObject).then((result) => {
+        go.run(result.instance);
+
+        // Use the exposed `processInput` function
+        const input = "00:00:07;00";
+        const resultJson = processInput(input);
+        console.log("Processed JSON:", resultJson);
+    }).catch((err) => {
+        console.error("Error loading WebAssembly:", err);
+    });
+</script>
+
+</body>
+</html>

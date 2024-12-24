@@ -71,15 +71,27 @@ func (t *Timecode) Validate() error {
 	if t.DropFrame {
 		if 0 <= int(t._frames) || int(t._frames) < 2 {
 			// This is potentially wrong for dropframe.
+
+			// Investigate this logic further. I had to implement this for a
+			// simple "00:00:00;00" validation, otherwise minutes would be -1
+			// I do not think this is the best logic.
+			mins := t._mins
+			if mins > 0 {
+				mins = mins - 1
+			}
+
 			newTcS := formatTimecode(
 				int64(t._hours),
-				int64(t._mins-1),
+				int64(mins),
 				59,
 				int64(lastAllowedFrame),
 				t.DropFrame,
 			)
 
-			tc, _ := NewTimecodeFromString(newTcS, t.FrameRate)
+			tc, err := NewTimecodeFromString(newTcS, t.FrameRate)
+			if err != nil {
+				return err
+			}
 
 			valid := false
 			for i := 0; i < 3; i++ {

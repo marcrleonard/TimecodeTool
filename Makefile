@@ -4,6 +4,12 @@ say_hello:
 build:
 	go build -o TimecodeTool ./cmd/TimecodeTool/main.go
 
+build_wasm:
+	GOOS=js GOARCH=wasm go build -o dist/timecodetool.wasm ./cmd/wasm/main.go
+	cp cmd/wasm/wasm_exec.js dist/
+	cp cmd/wasm/index.html dist/
+
+
 test_not_valid:
 	@./TimecodeTool 29.97 "00:07:00;00"
 
