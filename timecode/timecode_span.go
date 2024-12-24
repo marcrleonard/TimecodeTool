@@ -13,6 +13,16 @@ type TimecodeSpan struct {
 	Dropframe     bool
 }
 
+func NewTimecodeSpan(firstTimecode, lastTimecode *Timecode) (*TimecodeSpan, error) {
+
+	return &TimecodeSpan{
+		StartTimecode: firstTimecode,
+		LastTimecode:  lastTimecode,
+		Framerate:     firstTimecode.FrameRate,
+		Dropframe:     firstTimecode.DropFrame,
+	}, nil
+}
+
 // TOdo: This calc appears to be wrong
 func (t *TimecodeSpan) GetTotalSeconds() float64 {
 	tf := t.GetTotalFrames()

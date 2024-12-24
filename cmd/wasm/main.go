@@ -18,7 +18,7 @@ func ProcessInput(this js.Value, args []js.Value) interface{} {
 	input := args[0].String()
 	fmt.Println("Input received:", input) // Log the input to the console
 
-	resp := handlers.TimecodeValidate(input, 29.97)
+	resp := handlers.ValidateTimecode(input, 29.97)
 
 	var buf bytes.Buffer
 

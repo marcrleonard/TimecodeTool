@@ -9,6 +9,12 @@ build_wasm:
 	cp cmd/wasm/wasm_exec.js dist/
 	cp cmd/wasm/index.html dist/
 
+build_wasm_tinygo:
+	#this is not working yet.
+	tinygo build -o dist/timecodetool_tiny.wasm -target wasm ./cmd/wasm/main.go
+	cp cmd/wasm/wasm_exec.js dist/
+	cp cmd/wasm/index.html dist/
+
 
 test_not_valid:
 	@./TimecodeTool 29.97 "00:07:00;00"

@@ -7,7 +7,7 @@ import (
 	"TimecodeTool/timecode"
 )
 
-func TimecodeValidate(startTc string, fps float64) *timecode.ValidateResponse {
+func ValidateTimecode(startTc string, fps float64) *timecode.ValidateResponse {
 
 	firstTc, err := timecode.NewTimecodeFromString(startTc, fps)
 	if err != nil {
@@ -24,7 +24,7 @@ func TimecodeValidate(startTc string, fps float64) *timecode.ValidateResponse {
 
 }
 
-func NewTimecodeSpan(startTc string, endTc string, fps float64, excludeLastTimecode bool) *timecode.SpanResponse {
+func SpanTimecode(startTc string, endTc string, fps float64, excludeLastTimecode bool) *timecode.SpanResponse {
 
 	var allErrors []error
 
@@ -76,7 +76,7 @@ func NewTimecodeSpan(startTc string, endTc string, fps float64, excludeLastTimec
 	)
 }
 
-func TimecodeCalculate(inTc string, operations []string, fps float64, excludeLastTimecode bool) *timecode.CalcResponse {
+func CalculateTimecodes(inTc string, operations []string, fps float64, excludeLastTimecode bool) *timecode.CalcResponse {
 	firstTc, _ := timecode.NewTimecodeFromString(inTc, fps)
 	lastTimecode, _ := timecode.NewTimecodeFromString(inTc, fps)
 	curIdx := 0
@@ -121,7 +121,7 @@ func TimecodeCalculate(inTc string, operations []string, fps float64, excludeLas
 		curIdx += 2
 	}
 
-	span := NewTimecodeSpan(inTc, lastTimecode.GetTimecode(), fps, excludeLastTimecode)
+	span := SpanTimecode(inTc, lastTimecode.GetTimecode(), fps, excludeLastTimecode)
 
 	return timecode.NewOkCalcResponse(
 		firstTc.GetTimecode(),

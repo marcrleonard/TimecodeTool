@@ -50,7 +50,7 @@ func main() {
 		PreRunE: validateJson,
 		Run: func(cmd *cobra.Command, args []string) {
 			startTc := args[0]
-			resp := handlers.TimecodeValidate(startTc, fps)
+			resp := handlers.ValidateTimecode(startTc, fps)
 			if jsonOutput {
 
 				if prettyPrintJsonOutput {
@@ -83,7 +83,7 @@ func main() {
 		Run: func(cmd *cobra.Command, args []string) {
 			startTc := args[0]
 			endTc := args[1]
-			resp := handlers.NewTimecodeSpan(startTc, endTc, fps, excludeLastTimecode)
+			resp := handlers.SpanTimecode(startTc, endTc, fps, excludeLastTimecode)
 
 			if jsonOutput {
 
@@ -116,7 +116,7 @@ func main() {
 		Long: fmt.Sprintf(
 			"TimecodeTool calculate --fps=29.97 [Timecode] + [Last Timecode] - [frame number]"),
 		Run: func(cmd *cobra.Command, args []string) {
-			resp := handlers.TimecodeCalculate(args[0], args[1:], fps, excludeLastTimecode)
+			resp := handlers.CalculateTimecodes(args[0], args[1:], fps, excludeLastTimecode)
 
 			if jsonOutput {
 
