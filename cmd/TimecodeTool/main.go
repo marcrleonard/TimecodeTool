@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"TimecodeTool"
-	"TimecodeTool/handlers"
-	"TimecodeTool/timecode"
 	"github.com/invopop/jsonschema"
+	"github.com/marcrleonard/TimecodeTool"
+	"github.com/marcrleonard/TimecodeTool/timecodetool"
 
 	"github.com/spf13/cobra"
 )
@@ -50,7 +49,7 @@ func main() {
 		PreRunE: validateJson,
 		Run: func(cmd *cobra.Command, args []string) {
 			startTc := args[0]
-			resp := handlers.ValidateTimecode(startTc, fps)
+			resp := timecodetool.ValidateTimecode(startTc, fps)
 			if jsonOutput {
 
 				if prettyPrintJsonOutput {
@@ -64,7 +63,7 @@ func main() {
 					panic("Error encoding json")
 				}
 			} else {
-				timecode.PrettyPrint(resp)
+				resp.PrettyPrint()
 			}
 		},
 	}
@@ -83,7 +82,7 @@ func main() {
 		Run: func(cmd *cobra.Command, args []string) {
 			startTc := args[0]
 			endTc := args[1]
-			resp := handlers.SpanTimecode(startTc, endTc, fps, excludeLastTimecode)
+			resp := timecodetool.SpanTimecode(startTc, endTc, fps, excludeLastTimecode)
 
 			if jsonOutput {
 
@@ -98,7 +97,7 @@ func main() {
 					panic("Error encoding json")
 				}
 			} else {
-				timecode.PrettyPrintSpanResponse(*resp)
+				resp.PrettyPrint()
 			}
 		},
 	}
@@ -116,7 +115,7 @@ func main() {
 		Long: fmt.Sprintf(
 			"TimecodeTool calculate --fps=29.97 [Timecode] + [Last Timecode] - [frame number]"),
 		Run: func(cmd *cobra.Command, args []string) {
-			resp := handlers.CalculateTimecodes(args[0], args[1:], fps, excludeLastTimecode)
+			resp := timecodetool.CalculateTimecodes(args[0], args[1:], fps, excludeLastTimecode)
 
 			if jsonOutput {
 
@@ -131,7 +130,7 @@ func main() {
 					panic("Error encoding json")
 				}
 			} else {
-				timecode.PrettyPrintCalculateResponse(*resp)
+				resp.PrettyPrint()
 			}
 
 		},
@@ -155,11 +154,11 @@ func main() {
 
 			switch args[0] {
 			case "validate":
-				r = jsonschema.Reflect(&timecode.ValidateResponse{})
+				r = jsonschema.Reflect(&timecodetool.ValidateResponse{})
 			case "span":
-				r = jsonschema.Reflect(&timecode.SpanResponse{})
+				r = jsonschema.Reflect(&timecodetool.SpanResponse{})
 			case "calculate":
-				r = jsonschema.Reflect(&timecode.CalcResponse{})
+				r = jsonschema.Reflect(&timecodetool.CalcResponse{})
 			default:
 				// Handle invalid argument, could return an error or show a message
 				fmt.Println(`Invalid argument. Valid options are: "validate", "span", "calculate"`)

@@ -2,7 +2,7 @@ say_hello:
 	@echo "Hello. I'm a make file. I'm not sure why I'm here."
 
 build:
-	go build -o TimecodeTool ./cmd/TimecodeTool/main.go
+	go build -o dist/TimecodeTool ./cmd/TimecodeTool/main.go
 
 build_wasm:
 	GOOS=js GOARCH=wasm go build -o dist/timecodetool.wasm ./cmd/wasm/main.go

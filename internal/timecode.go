@@ -1,4 +1,4 @@
-package timecode
+package internal
 
 import (
 	"fmt"
