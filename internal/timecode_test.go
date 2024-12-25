@@ -81,7 +81,7 @@ func TestDFNonValid(t *testing.T) {
 	}{
 		{
 			name:      "Errors when invalid dropframe timecode",
-			error:     fmt.Errorf("00:07:00;00 is not a valid timecode."),
+			error:     fmt.Errorf("00:07:00;00 is valid timecode for drop frame."),
 			timecode:  "00:07:00;00",
 			framerate: 29.97,
 		},
