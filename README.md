@@ -2,8 +2,18 @@
 
 `TimecodeTool` is a simple CLI tool that does a handful of handy functions:
 - Validate input timecode
-- Calculate times spanning two timecodes in playback time, framecounts, timecode time, and more.
+- Calculate times spanning two timecodes in playback time, framecounts, and more.
 - Timecode calculator where you can add timecodes or frames together.
+
+## Installation
+
+### Download
+
+Download the latest from the [releases page](https://github.com/marcrleonard/TimecodeTool/releases).
+
+## Build
+
+Clone the repo and run `make build`
 
 ## Usage
 
@@ -28,4 +38,5 @@ To build the tool, simply run `go build -o dist/TimecodeTool ./cmd/TimecodeTool/
 `make build_wasm`
 
 ## Todo
+- Do a check to make sure that frame rates and dropframe-ness are compat
 - Introduce an API to convert timecodes between different frame rates
