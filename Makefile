@@ -25,8 +25,14 @@ test:
 	@go test ./timecode -v
 
 build_docs:
-	go get github.com/marcrleonard/TimecodeTool/timecodetool@latest
-	$(MAKE) build
+	# this is for github actions
+	ifeq ($(wildcard dist/TimecodeTool-linux-amd64),)
+		$(MAKE) build
+	else
+		# Proceed with your commands if file exists
+		echo "File exists"
+	endif
+
 	@./dist/TimecodeTool gendocs web/docs/
 
 	cd web/docs/ && for file in *.md; do \
