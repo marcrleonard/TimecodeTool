@@ -27,11 +27,7 @@ test:
 build_docs:
 	$(MAKE) build
 	@./dist/TimecodeTool gendocs web/docs/
-#	cd web/docs/ && for file in *.md; do \
-#  		sed -i '' 's/^## /# /g' "$$file"; \
-#		sed -i '' 's/^### /## /g' "$$file"; \
-#		sed -i '' 's/^#### /### /g' "$$file"; \
-#	done
+
 	cd web/docs/ && for file in *.md; do \
 		pandoc "$$file" -o "$${file%.md}.html" "--template=/Users/marcleonard/Projects/TimecodeTool/web/templates/_template.html"; \
 	done
@@ -41,4 +37,5 @@ build_docs:
     	sed -i '' 's/\(<a href="\)\([a-zA-Z0-9_-]*\)\.md">/\1\2.html">/g' "$$file"; \
     done
 
-	mv web/docs/TimecodeTool.html web/docs/index.html
+	# This creates a simple entry point at /docs
+	cp web/docs/TimecodeTool.html web/docs/index.html
