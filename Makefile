@@ -17,25 +17,23 @@ build_wasm_tinygo:
 test:
 	@go test ./internal -v
 
+export outputDir = ../TimecodeTool-Marketing/docs
+export current_dir = $(shell pwd)
+
 build_docs:
 	# this is for github actions
-	ifeq ($(wildcard dist/TimecodeTool-linux-amd64),)
-		$(MAKE) build
-	else
-		# Proceed with your commands if file exists
-		echo "File exists"
-	endif
+	$(MAKE) build
 
-	@./dist/TimecodeTool gendocs web/docs/
+	@./dist/TimecodeTool gendocs $$outputDir
 
-	cd web/docs/ && for file in *.md; do \
-		pandoc "$$file" -o "$${file%.md}.html" "--template=/Users/marcleonard/Projects/TimecodeTool/web/templates/_template.html"; \
+	cd $$outputDir && for file in *.md; do \
+		pandoc "$$file" -o "$${file%.md}.html" --template=$$current_dir/web/templates/_template.html; \
 	done
 
-	cd web/docs/ && for file in *.html; do \
+	cd $$outputDir && for file in *.html; do \
         sed -i '' 's/<h2 id="\([^"]*\)">/<h2 id="\1" class="major">/g' "$$file"; \
     	sed -i '' 's/\(<a href="\)\([a-zA-Z0-9_-]*\)\.md">/\1\2.html">/g' "$$file"; \
     done
 
 	# This creates a simple entry point at /docs
-	cp web/docs/TimecodeTool.html web/docs/index.html
+	cp $$outputDir/TimecodeTool.html $$outputDir/index.html
