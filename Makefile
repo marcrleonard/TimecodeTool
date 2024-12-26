@@ -25,7 +25,7 @@ test:
 	@go test ./timecode -v
 
 build_docs:
-	go get github.com/marcrleonard/TimecodeTool/timecodetool
+	go get github.com/marcrleonard/TimecodeTool/timecodetool@latest
 	$(MAKE) build
 	@./dist/TimecodeTool gendocs web/docs/
 
