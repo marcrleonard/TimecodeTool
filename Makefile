@@ -23,3 +23,22 @@ test_span:
 
 test:
 	@go test ./timecode -v
+
+build_docs:
+	$(MAKE) build
+	@./dist/TimecodeTool gendocs web/docs/
+#	cd web/docs/ && for file in *.md; do \
+#  		sed -i '' 's/^## /# /g' "$$file"; \
+#		sed -i '' 's/^### /## /g' "$$file"; \
+#		sed -i '' 's/^#### /### /g' "$$file"; \
+#	done
+	cd web/docs/ && for file in *.md; do \
+		pandoc "$$file" -o "$${file%.md}.html" "--template=/Users/marcleonard/Projects/TimecodeTool/web/templates/_template.html"; \
+	done
+
+	cd web/docs/ && for file in *.html; do \
+        sed -i '' 's/<h2 id="\([^"]*\)">/<h2 id="\1" class="major">/g' "$$file"; \
+    	sed -i '' 's/\(<a href="\)\([a-zA-Z0-9_-]*\)\.md">/\1\2.html">/g' "$$file"; \
+    done
+
+	mv web/docs/TimecodeTool.html web/docs/index.html
