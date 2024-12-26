@@ -8,9 +8,21 @@ import (
 	"github.com/invopop/jsonschema"
 	"github.com/marcrleonard/TimecodeTool"
 	"github.com/marcrleonard/TimecodeTool/timecodetool"
+	"github.com/spf13/cobra/doc"
 
 	"github.com/spf13/cobra"
 )
+
+var rootCmd = &cobra.Command{
+	Use:     "TimecodeTool",
+	Short:   "A timecode CLI tool",
+	Version: TimecodeTool.VERSION,
+	Long: fmt.Sprintf(
+		"TimecodeTool --fps=29.97 [Timecode]\n" +
+			"TimecodeTool --fps=29.97 [First Timecode] [Last Timecode]\n" +
+			"TimecodeTool --fps=29.97 [Timecode] + [Timecode] - [Frames]\n"),
+	PreRunE: validateJson,
+}
 
 func validateJson(cmd *cobra.Command, args []string) error {
 	// Check the flag dependency
@@ -18,6 +30,17 @@ func validateJson(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("the --pretty-print flag requires the --json-output flag to be set")
 	}
 	return nil
+}
+
+func generateDocs(cmd *cobra.Command, args []string) {
+	// Generate Markdown files
+	err := doc.GenMarkdownTree(rootCmd, "./dist/docs")
+	if err != nil {
+		fmt.Println("Error generating markdown docs:", err)
+		return
+	}
+	fmt.Println("Markdown documentation generated in ./dist")
+
 }
 
 func main() {
@@ -28,17 +51,6 @@ func main() {
 		prettyPrintJsonOutput bool
 		excludeLastTimecode   bool
 	)
-
-	rootCmd := &cobra.Command{
-		Use:     "TimecodeTool",
-		Short:   "A timecode CLI tool",
-		Version: TimecodeTool.VERSION,
-		Long: fmt.Sprintf(
-			"TimecodeTool --fps=29.97 [Timecode]\n" +
-				"TimecodeTool --fps=29.97 [First Timecode] [Last Timecode]\n" +
-				"TimecodeTool --fps=29.97 [Timecode] + [Timecode] - [Frames]\n"),
-		PreRunE: validateJson,
-	}
 
 	validateCmd := &cobra.Command{
 		Use:   "validate [flags] [Timecode]",
@@ -175,7 +187,13 @@ func main() {
 		},
 	}
 
-	rootCmd.AddCommand(validateCmd, spanCmd, calcCmd, outputSchema)
+	docsCmd := &cobra.Command{
+		Use:   "gendocs",
+		Short: "Generate CLI documentation",
+		Run:   generateDocs,
+	}
+
+	rootCmd.AddCommand(validateCmd, spanCmd, calcCmd, outputSchema, docsCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		//fmt.Printf("Error: %w", err)
