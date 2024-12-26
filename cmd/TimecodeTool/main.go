@@ -31,13 +31,12 @@ func main() {
 	)
 
 	var rootCmd = &cobra.Command{
-		Use: "TimecodeTool [validate|span|calculate|schema] [args] [flags]",
-		Short: "A timecode CLI tool \n\n`TimecodeTool validate [args] [flags]` For timecode validation\n\n" +
+		Use:     "TimecodeTool [validate|span|calculate|schema] [args] [flags]",
+		Short:   "A timecode CLI tool.",
+		Version: TimecodeTool.VERSION,
+		Long: "A timecode CLI tool.\n\n`TimecodeTool validate [args] [flags]` For timecode validation\n\n" +
 			"`TimecodeTool span [args] [flags]` For timecode span length information\n\n" +
 			"`TimecodeTool calculator [args] [flags]` for timecode calculations",
-		Version: TimecodeTool.VERSION,
-		//Long: fmt.Sprintf(
-		//	"`TimecodeTool [validate|span|calculate|schema] [args] [flags]`\n"),
 		PreRunE: validateJson,
 	}
 
@@ -200,7 +199,7 @@ func main() {
 	rootCmd.AddCommand(validateCmd, spanCmd, calcCmd, outputSchema, docsCmd)
 
 	if err := rootCmd.Execute(); err != nil {
-		//fmt.Printf("Error: %w", err)
+		fmt.Printf("Exec error: %w", err)
 	}
 
 }
