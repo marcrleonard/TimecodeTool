@@ -13,34 +13,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var rootCmd = &cobra.Command{
-	Use:     "TimecodeTool",
-	Short:   "A timecode CLI tool",
-	Version: TimecodeTool.VERSION,
-	Long: fmt.Sprintf(
-		"TimecodeTool --fps=29.97 [Timecode]\n" +
-			"TimecodeTool --fps=29.97 [First Timecode] [Last Timecode]\n" +
-			"TimecodeTool --fps=29.97 [Timecode] + [Timecode] - [Frames]\n"),
-	PreRunE: validateJson,
-}
-
 func validateJson(cmd *cobra.Command, args []string) error {
 	// Check the flag dependency
 	if cmd.Flags().Changed("pretty-print") && !cmd.Flags().Changed("json-output") {
 		return fmt.Errorf("the --pretty-print flag requires the --json-output flag to be set")
 	}
 	return nil
-}
-
-func generateDocs(cmd *cobra.Command, args []string) {
-	// Generate Markdown files
-	err := doc.GenMarkdownTree(rootCmd, "./dist/docs")
-	if err != nil {
-		fmt.Println("Error generating markdown docs:", err)
-		return
-	}
-	fmt.Println("Markdown documentation generated in ./dist")
-
 }
 
 func main() {
@@ -52,12 +30,22 @@ func main() {
 		excludeLastTimecode   bool
 	)
 
+	var rootCmd = &cobra.Command{
+		Use: "TimecodeTool [validate|span|calculate|schema] [args] [flags]",
+		Short: "A timecode CLI tool \n\n`TimecodeTool validate [args] [flags]` For timecode validation\n\n" +
+			"`TimecodeTool span [args] [flags]` For timecode span length information\n\n" +
+			"`TimecodeTool calculator [args] [flags]` for timecode calculations",
+		Version: TimecodeTool.VERSION,
+		//Long: fmt.Sprintf(
+		//	"`TimecodeTool [validate|span|calculate|schema] [args] [flags]`\n"),
+		PreRunE: validateJson,
+	}
+
 	validateCmd := &cobra.Command{
-		Use:   "validate [flags] [Timecode]",
-		Short: "Validate a timecode",
-		Args:  cobra.ExactArgs(1),
-		Long: fmt.Sprintf(
-			"TimecodeTool validate --fps=29.97 [Timecode]"),
+		Use:     "validate [flags] [Timecode]",
+		Short:   "Returns a timecodes validity and information regarding the frame.",
+		Args:    cobra.ExactArgs(1),
+		Long:    "Returns a timecodes validity and information regarding the frame.",
 		PreRunE: validateJson,
 		Run: func(cmd *cobra.Command, args []string) {
 			startTc := args[0]
@@ -85,11 +73,10 @@ func main() {
 	validateCmd.MarkFlagsOneRequired("fps")
 
 	spanCmd := &cobra.Command{
-		Use:   "span [flags] [First Timecode] [Last Timecode]",
-		Short: "Get the information spanning two timecodes",
-		Args:  cobra.ExactArgs(2),
-		Long: fmt.Sprintf(
-			"TimecodeTool span --fps=29.97 [First Timecode] [Last Timecode]"),
+		Use:     "span [flags] [First Timecode] [Last Timecode]",
+		Short:   "Get duration information spanning two timecodes.",
+		Args:    cobra.ExactArgs(2),
+		Long:    "Get duration information spanning two timecodes. Returns durations in frames, seconds, time, and more.",
 		PreRunE: validateJson,
 		Run: func(cmd *cobra.Command, args []string) {
 			startTc := args[0]
@@ -121,11 +108,10 @@ func main() {
 
 	calcCmd := &cobra.Command{
 		Use:     "calculate --fps=29.97 [First Timecode] + [Timecode] - [frame number]",
-		Short:   "Timecode/Frame calculator",
+		Short:   "Timecode/Frame calculator. Enter either timecode strings or frame numbers. ",
 		Args:    cobra.MinimumNArgs(3),
 		PreRunE: validateJson,
-		Long: fmt.Sprintf(
-			"TimecodeTool calculate --fps=29.97 [Timecode] + [Last Timecode] - [frame number]"),
+		Long:    "Timecode/Frame calculator. Enter either timecode strings or frame numbers. It will add all these all together and generate span. When entering a timecode the amount of frames added/subtracted is relative to 00:00:00:00, with the timecode entered being inclusive. Use the `-e` flag to make it exclusive.",
 		Run: func(cmd *cobra.Command, args []string) {
 			resp := timecodetool.CalculateTimecodes(args[0], args[1:], fps, excludeLastTimecode)
 
@@ -149,7 +135,7 @@ func main() {
 	}
 	calcCmd.Flags().BoolVar(&jsonOutput, "json-output", false, "Output as JSON")
 	calcCmd.Flags().BoolVar(&prettyPrintJsonOutput, "pretty-print", false, "Output indented JSON")
-	calcCmd.Flags().BoolVarP(&excludeLastTimecode, "exclude-last-timecode", "e", false, `When entering a timecode to be added or subtracted, the calculations will be based off the timecode, minus one frame. This typically make it easier to read and enter timecode. For instance, with this flag set `+"`TimecodeTool calculate \"00:00:00:00\" + \"00:00:00:01\" --fps=23.976 -e`"+"will yield `00:00:00:01`")
+	calcCmd.Flags().BoolVarP(&excludeLastTimecode, "exclude-last-timecode", "e", false, `When entering a timecode to be added or subtracted, the calculations will be based off the timecode, minus one frame. This typically make it easier to read and enter timecode."`)
 	calcCmd.Flags().Float64Var(&fps, "fps", 29.97, "Frame rate of timecodes")
 	calcCmd.MarkFlagsOneRequired("fps")
 
@@ -190,7 +176,25 @@ func main() {
 	docsCmd := &cobra.Command{
 		Use:   "gendocs",
 		Short: "Generate CLI documentation",
-		Run:   generateDocs,
+		Run: func(cmd *cobra.Command, args []string) {
+			// Generate Markdown files
+
+			//outputDir := "./dist/md"
+			outputDir := args[0]
+			if _, err := os.Stat(outputDir); os.IsNotExist(err) {
+				if err = os.Mkdir(outputDir, os.ModePerm); err != nil {
+					return
+				}
+			}
+
+			err := doc.GenMarkdownTree(rootCmd, outputDir)
+			if err != nil {
+				fmt.Println("Error generating markdown docs:", err)
+				return
+			}
+			fmt.Printf("Markdown documentation generated in %s\n", outputDir)
+
+		},
 	}
 
 	rootCmd.AddCommand(validateCmd, spanCmd, calcCmd, outputSchema, docsCmd)
