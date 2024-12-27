@@ -1,5 +1,5 @@
 say_hello:
-	@echo "Hello. I'm a make file. I'm not sure why I'm here."
+	@echo "Hello. I'm a make file. I'm not sure why I'm here. "
 
 build:
 	go build -o dist/TimecodeTool ./cmd/TimecodeTool/main.go
