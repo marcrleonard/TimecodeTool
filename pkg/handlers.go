@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"timecodetool/internal"
+	"github.com/marcrleonard/TimecodeTool/internal"
 )
 
 func ValidateTimecode(startTc string, fps float64) *ValidateResponse {
