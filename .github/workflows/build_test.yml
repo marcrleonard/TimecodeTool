@@ -1,5 +1,5 @@
-# This workflow will build a golang project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+# This workflow will build and test a Golang project
+# For more information, see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
 
 name: Build and Test
 
@@ -11,13 +11,17 @@ on:
 
 jobs:
   test:
-    - name: Test
-      run: go test -v ./...
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run tests
+        run: go test -v ./...
 
   build-and-release:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
         with:
@@ -28,37 +32,31 @@ jobs:
         run: |
           # Ensure we have a valid HEAD^
           if ! git rev-parse --verify HEAD^ >/dev/null 2>&1; then
-          echo "Error: Cannot check version bump. Ensure the repository has at least one commit."
-          exit 1
+            echo "Error: Cannot check version bump. Ensure the repository has at least one commit."
+            exit 1
           fi
           
           # Check if the VERSION file in pkg/ was updated
           if ! git diff --name-only HEAD^ HEAD | grep -q "pkg/VERSION"; then
-          echo "Error: pkg/VERSION must be updated to bump the version for a new release."
-          exit 1
+            echo "Error: pkg/VERSION must be updated to bump the version for a new release."
+            exit 1
           fi
           
           # Read the new version
           VERSION=$(cat pkg/VERSION)
           echo "version=$VERSION" >> $GITHUB_ENV
-          echo "VERSION=$VERSION" >> $GITHUB_ENV  # Ensure VERSION is available
-          
-          
-          # Step 3: Build the Go project for Linux, macOS, and Windows
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
       - name: Build Go project for Linux, macOS (arm64), and Windows
         run: |
           mkdir -p dist
-          
           # Build for Linux (default)
           make build
-          
           # Build for macOS arm64
           GOOS=darwin GOARCH=arm64 go build -o dist/TimecodeTool-osx-arm64 cmd/TimecodeTool/main.go
-
           # Build for Windows amd64
           GOOS=windows GOARCH=amd64 go build -o dist/TimecodeTool-windows-amd64.exe cmd/TimecodeTool/main.go
 
-      # Step 4: Tag the release
       - name: Create release tag
         run: |
           git config user.name "github-actions[bot]"
@@ -66,7 +64,6 @@ jobs:
           git tag -a "v${{ env.VERSION }}" -m "Release version ${{ env.VERSION }}"
           git push origin "v${{ env.VERSION }}"
 
-      # Step 5: Create GitHub Release and Upload Assets
       - name: Create GitHub Release and Upload Assets
         uses: softprops/action-gh-release@v2
         with:
@@ -77,5 +74,4 @@ jobs:
             dist/TimecodeTool-osx-arm64
             dist/TimecodeTool-windows-amd64.exe
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # or use the default token
-
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
