@@ -29,13 +29,15 @@ Clone the repo and run `make build`
 ### JSON Schema outputs
 `TimecodeTool schema validate`
 
-## Development
+## Contributing
 
-### CLI
-To build the tool, run `go build -o dist/TimecodeTool ./cmd/TimecodeTool/main.go` in the root directory of the project. This will create the executable of `dist/TimecodeTool`
+### Pull Requests
 
-### Wasm
-`make build_wasm`
+All dev is done through pull rests on main. They cannot be merged unless they pass the status checks.
+
+### Builds
+
+Builds will only occur if the status check on main completes with a version bump. You can still merge into main without a version bump, but a build may not occur if it is not bumped.
 
 ## Todo
 - Do a check to make sure that frame rates and dropframe-ness are compat
