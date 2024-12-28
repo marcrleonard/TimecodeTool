@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/invopop/jsonschema"
-	"github.com/spf13/cobra/doc"
-	"timecodetool/timecodetool"
+	"github.com/marcrleonard/TimecodeTool/pkg"
 
+	"github.com/invopop/jsonschema"
 	"github.com/spf13/cobra"
+	"github.com/spf13/cobra/doc"
 )
 
 func validateJson(cmd *cobra.Command, args []string) error {

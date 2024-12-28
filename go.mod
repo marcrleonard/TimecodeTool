@@ -1,4 +1,4 @@
-module timecodetool
+module github.com/marcrleonard/TimecodeTool
 
 go 1.22.4
 
