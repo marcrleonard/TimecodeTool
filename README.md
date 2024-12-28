@@ -32,7 +32,7 @@ Clone the repo and run `make build`
 ## Development
 
 ### CLI
-To build the tool, simply run `go build -o dist/TimecodeTool ./cmd/TimecodeTool/main.go` in the root directory of the project. This will create the executable of `dist/TimecodeTool`
+To build the tool, run `go build -o dist/TimecodeTool ./cmd/TimecodeTool/main.go` in the root directory of the project. This will create the executable of `dist/TimecodeTool`
 
 ### Wasm
 `make build_wasm`
