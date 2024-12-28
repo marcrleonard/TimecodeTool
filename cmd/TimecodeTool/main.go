@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 
-	"TimecodeTool"
-	"TimecodeTool/timecodetool"
 	"github.com/invopop/jsonschema"
 	"github.com/spf13/cobra/doc"
+	"timecodetool"
+	"timecodetool/timecodetool"
 
 	"github.com/spf13/cobra"
 )
