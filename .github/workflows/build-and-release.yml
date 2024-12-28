@@ -21,22 +21,23 @@ jobs:
         run: |
           # Ensure we have a valid HEAD^
           if ! git rev-parse --verify HEAD^ >/dev/null 2>&1; then
-            echo "Error: Cannot check version bump. Ensure the repository has at least two commits."
-            exit 1
+          echo "Error: Cannot check version bump. Ensure the repository has at least one commit."
+          exit 1
           fi
-
-          # Check if the VERSION file was updated
-          if ! git diff --name-only HEAD^ HEAD | grep -q "VERSION"; then
-            echo "Error: VERSION must be updated to bump the version for a new release."
-            exit 1
+          
+          # Check if the VERSION file in pkg/ was updated
+          if ! git diff --name-only HEAD^ HEAD | grep -q "pkg/VERSION"; then
+          echo "Error: pkg/VERSION must be updated to bump the version for a new release."
+          exit 1
           fi
-
+          
           # Read the new version
-          VERSION=$(cat VERSION)
+          VERSION=$(cat pkg/VERSION)
           echo "version=$VERSION" >> $GITHUB_ENV
           echo "VERSION=$VERSION" >> $GITHUB_ENV  # Ensure VERSION is available
-
-      # Step 3: Build the Go project for Linux, macOS, and Windows
+          
+          
+          # Step 3: Build the Go project for Linux, macOS, and Windows
       - name: Build Go project for Linux, macOS (arm64), and Windows
         run: |
           mkdir -p dist
