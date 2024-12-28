@@ -53,7 +53,7 @@ func main() {
 				if prettyPrintJsonOutput {
 					prettyJSON, err := json.MarshalIndent(resp, "", "  ")
 					if err != nil {
-						fmt.Println(os.Stderr, "Error encoding JSON:", err)
+						fmt.Println("Error encoding JSON:", err)
 						os.Exit(1)
 					}
 					fmt.Println(string(prettyJSON))
@@ -86,7 +86,7 @@ func main() {
 				if prettyPrintJsonOutput {
 					prettyJSON, err := json.MarshalIndent(resp, "", "  ")
 					if err != nil {
-						fmt.Println(os.Stderr, "Error encoding JSON:", err)
+						fmt.Println("Error encoding JSON:", err)
 						os.Exit(1)
 					}
 					fmt.Println(string(prettyJSON))
@@ -118,7 +118,7 @@ func main() {
 				if prettyPrintJsonOutput {
 					prettyJSON, err := json.MarshalIndent(resp, "", "  ")
 					if err != nil {
-						fmt.Println(os.Stderr, "Error encoding JSON:", err)
+						fmt.Println("Error encoding JSON:", err)
 						os.Exit(1)
 					}
 					fmt.Println(string(prettyJSON))
