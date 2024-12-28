@@ -198,7 +198,7 @@ func main() {
 	rootCmd.AddCommand(validateCmd, spanCmd, calcCmd, outputSchema, docsCmd)
 
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Printf("Exec error: %w", err)
+		fmt.Printf("Exec error: %s", err)
 	}
 
 }
