@@ -15,7 +15,7 @@ build_wasm_tinygo:
 	cp cmd/wasm/index.html dist/
 
 test:
-	@go test ./internal -v
+	@go test -v ./...
 
 export outputDir = ../TimecodeTool-Marketing/docs
 export current_dir = $(shell pwd)
