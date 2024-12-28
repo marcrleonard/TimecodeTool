@@ -7,7 +7,6 @@ import (
 
 	"github.com/invopop/jsonschema"
 	"github.com/spf13/cobra/doc"
-	"timecodetool"
 	"timecodetool/timecodetool"
 
 	"github.com/spf13/cobra"
@@ -33,7 +32,7 @@ func main() {
 	var rootCmd = &cobra.Command{
 		Use:     "TimecodeTool [validate|span|calculate|schema] [args] [flags]",
 		Short:   "A timecode CLI tool.",
-		Version: TimecodeTool.VERSION,
+		Version: timecodetool.VERSION,
 		Long: "A timecode CLI tool.\n\n`TimecodeTool validate [args] [flags]` For timecode validation\n\n" +
 			"`TimecodeTool span [args] [flags]` For timecode span length information\n\n" +
 			"`TimecodeTool calculator [args] [flags]` for timecode calculations",
