@@ -55,6 +55,18 @@
 <script src="assets/js/breakpoints.min.js"></script>
 <script src="assets/js/util.js"></script>
 <script src="assets/js/main.js"></script>
+<script>
+    // Wrap the text after "TimecodeTool" in <code> tags for <h2> elements
+    document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll("h2").forEach(h2 => {
+            const match = h2.textContent.match(/^TimecodeTool\s+(.+)/);
+            if (match) {
+                h2.innerHTML = `TimecodeTool <code>${match[1]}</code>`;
+            }
+        });
+    });
+</script>
+
 
 </body>
 </html>
