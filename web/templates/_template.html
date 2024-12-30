@@ -48,6 +48,19 @@
 </footer>
 
 <!-- Scripts -->
+<script>
+    // Wrap the text after "TimecodeTool" in <code> tags for <h2> elements
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll("h2").forEach(function(h2) {
+            var match = h2.textContent.match(/^TimecodeTool\s+(.+)/);
+            if (match) {
+                // comment back in for add code
+                // h2.innerHTML = "TimecodeTool <code>" + match[1] + "</code>";
+            }
+        });
+    });
+</script>
+
 <script src="assets/js/jquery.min.js"></script>
 <script src="assets/js/jquery.scrollex.min.js"></script>
 <script src="assets/js/jquery.scrolly.min.js"></script>
@@ -55,17 +68,6 @@
 <script src="assets/js/breakpoints.min.js"></script>
 <script src="assets/js/util.js"></script>
 <script src="assets/js/main.js"></script>
-<script>
-    // Wrap the text after "TimecodeTool" in <code> tags for <h2> elements
-    document.addEventListener("DOMContentLoaded", () => {
-        document.querySelectorAll("h2").forEach(h2 => {
-            const match = h2.textContent.match(/^TimecodeTool\s+(.+)/);
-            if (match) {
-                h2.innerHTML = `TimecodeTool <code>${match[1]}</code>`;
-            }
-        });
-    });
-</script>
 
 
 </body>
