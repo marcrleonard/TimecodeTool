@@ -65,7 +65,7 @@ func TestGetSpanRealtime(t *testing.T) {
 	end := &Timecode{FrameRate: 24.0, DropFrame: false, _frames: 240}
 	span, _ := NewTimecodeSpan(start, end)
 
-	expected := "00:00:10.042" // 10 seconds in real time
+	expected := "00:00:10.042" // 10.042 seconds in real time
 	if got := span.GetSpanRealtime(); got != expected {
 		t.Errorf("expected realtime %v, got %v", expected, got)
 	}

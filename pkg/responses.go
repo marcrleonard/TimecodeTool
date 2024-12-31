@@ -114,10 +114,11 @@ func newOkValidateResponse(InputTimecode string, InputFps float64, IsDf bool, Ne
 	}
 }
 
-func newFailedValidateResponse(InputTimecode string, InputFps float64, ErrorMsg string) *ValidateResponse {
+func newFailedValidateResponse(InputTimecode string, InputFps float64, IsDf bool, ErrorMsg string) *ValidateResponse {
 	return &ValidateResponse{
 		InputTimecode: InputTimecode,
 		InputFps:      InputFps,
+		IsDf:          IsDf,
 		Valid:         false,
 		ErrorMsg:      ErrorMsg,
 	}
