@@ -7,24 +7,24 @@ import (
 	"github.com/marcrleonard/TimecodeTool/internal"
 )
 
-func ValidateTimecode(startTc string, fps float64) *ValidateResponse {
+func NewValidateTimecode(startTc string, fps float64) *ValidateResponse {
 
 	firstTc, err := internal.NewTimecodeFromString(startTc, fps)
 	if err != nil {
-		return NewFailedValidateResponse(startTc, fps, err.Error())
+		return newFailedValidateResponse(startTc, fps, false, err.Error())
 	}
 	if err := firstTc.Validate(); err != nil {
-		return NewFailedValidateResponse(startTc, fps, err.Error())
+		return newFailedValidateResponse(startTc, fps, firstTc.DropFrame, err.Error())
 	}
 
 	nextFrame, _ := internal.NewTimecodeFromString(startTc, fps)
 	nextFrame.AddFrames(1)
 
-	return NewOkValidateResponse(startTc, fps, firstTc.DropFrame, nextFrame.GetTimecode())
+	return newOkValidateResponse(startTc, fps, firstTc.DropFrame, nextFrame.GetTimecode())
 
 }
 
-func SpanTimecode(startTc string, endTc string, fps float64, excludeLastTimecode bool) *SpanResponse {
+func NewSpanTimecode(startTc string, endTc string, fps float64, excludeLastTimecode bool) *SpanResponse {
 
 	var allErrors []error
 
@@ -46,12 +46,12 @@ func SpanTimecode(startTc string, endTc string, fps float64, excludeLastTimecode
 	}
 
 	if len(allErrors) > 0 {
-		return NewFailedSpanResponse(startTc, endTc, fps, excludeLastTimecode, errors.Join(allErrors...).Error())
+		return newFailedSpanResponse(startTc, endTc, fps, excludeLastTimecode, errors.Join(allErrors...).Error())
 	}
 
 	span, err := internal.NewTimecodeSpan(firstTc, lastTimecode)
 	if err != nil {
-		return NewFailedSpanResponse(startTc, endTc, fps, excludeLastTimecode, err.Error())
+		return newFailedSpanResponse(startTc, endTc, fps, excludeLastTimecode, err.Error())
 	}
 
 	nextTimecode, err := internal.NewTimecodeFromString(endTc, fps)
@@ -60,7 +60,7 @@ func SpanTimecode(startTc string, endTc string, fps float64, excludeLastTimecode
 	}
 	nextTimecode.AddFrames(1)
 
-	return NewOkSpanResponse(
+	return newOkSpanResponse(
 		startTc,
 		endTc,
 		fps,
@@ -76,7 +76,7 @@ func SpanTimecode(startTc string, endTc string, fps float64, excludeLastTimecode
 	)
 }
 
-func CalculateTimecodes(inTc string, operations []string, fps float64, excludeLastTimecode bool) *CalcResponse {
+func NewCalculateTimecodes(inTc string, operations []string, fps float64, excludeLastTimecode bool) *CalcResponse {
 	firstTc, _ := internal.NewTimecodeFromString(inTc, fps)
 	lastTimecode, _ := internal.NewTimecodeFromString(inTc, fps)
 	curIdx := 0
@@ -95,7 +95,7 @@ func CalculateTimecodes(inTc string, operations []string, fps float64, excludeLa
 		nexTc, err := internal.ParseStringToTimecode(nextTime, fps, excludeLastTimecode, firstTc.DropFrame)
 
 		if err != nil {
-			return NewFailedCalcResponse(
+			return newFailedCalcResponse(
 				inTc,
 				"",
 				fps,
@@ -121,9 +121,9 @@ func CalculateTimecodes(inTc string, operations []string, fps float64, excludeLa
 		curIdx += 2
 	}
 
-	span := SpanTimecode(inTc, lastTimecode.GetTimecode(), fps, excludeLastTimecode)
+	span := NewSpanTimecode(inTc, lastTimecode.GetTimecode(), fps, excludeLastTimecode)
 
-	return NewOkCalcResponse(
+	return newOkCalcResponse(
 		firstTc.GetTimecode(),
 		lastTimecode.GetTimecode(),
 		fps,

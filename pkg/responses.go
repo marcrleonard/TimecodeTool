@@ -39,8 +39,8 @@ type CalcResponse struct {
 	Steps        []CalculationStep
 }
 
-// NewOkCalcResponse creates a new successful CalcResponse with steps
-func NewOkCalcResponse(
+// newOkCalcResponse creates a new successful CalcResponse with steps
+func newOkCalcResponse(
 	InputFirstTimecode string,
 	LastTimecode string,
 	InputFps float64,
@@ -56,7 +56,7 @@ func NewOkCalcResponse(
 	Steps []CalculationStep) *CalcResponse {
 
 	// Create the SpanResponse part of the CalcResponse
-	spanResponse := NewOkSpanResponse(
+	spanResponse := newOkSpanResponse(
 		InputFirstTimecode,
 		"",
 		InputFps,
@@ -79,8 +79,8 @@ func NewOkCalcResponse(
 	}
 }
 
-// NewFailedCalcResponse creates a new failed CalcResponse with an error message
-func NewFailedCalcResponse(
+// newFailedCalcResponse creates a new failed CalcResponse with an error message
+func newFailedCalcResponse(
 	InputFirstTimecode string,
 	InputLastTimecode string,
 	InputFps float64,
@@ -89,7 +89,7 @@ func NewFailedCalcResponse(
 	Steps []CalculationStep) *CalcResponse {
 
 	// Create the failed SpanResponse part
-	spanResponse := NewFailedSpanResponse(
+	spanResponse := newFailedSpanResponse(
 		InputFirstTimecode,
 		InputLastTimecode,
 		InputFps,
@@ -104,7 +104,7 @@ func NewFailedCalcResponse(
 	}
 }
 
-func NewOkValidateResponse(InputTimecode string, InputFps float64, IsDf bool, NextTimecode string) *ValidateResponse {
+func newOkValidateResponse(InputTimecode string, InputFps float64, IsDf bool, NextTimecode string) *ValidateResponse {
 	return &ValidateResponse{
 		InputTimecode: InputTimecode,
 		InputFps:      InputFps,
@@ -114,16 +114,17 @@ func NewOkValidateResponse(InputTimecode string, InputFps float64, IsDf bool, Ne
 	}
 }
 
-func NewFailedValidateResponse(InputTimecode string, InputFps float64, ErrorMsg string) *ValidateResponse {
+func newFailedValidateResponse(InputTimecode string, InputFps float64, IsDf bool, ErrorMsg string) *ValidateResponse {
 	return &ValidateResponse{
 		InputTimecode: InputTimecode,
 		InputFps:      InputFps,
+		IsDf:          IsDf,
 		Valid:         false,
 		ErrorMsg:      ErrorMsg,
 	}
 }
 
-func NewOkSpanResponse(
+func newOkSpanResponse(
 	InputFirstTimecode string,
 	InputLastTimecode string,
 	InputFps float64,
@@ -154,7 +155,7 @@ func NewOkSpanResponse(
 	}
 }
 
-func NewFailedSpanResponse(
+func newFailedSpanResponse(
 	InputFirstTimecode string,
 	InputLastTimecode string,
 	InputFps float64,

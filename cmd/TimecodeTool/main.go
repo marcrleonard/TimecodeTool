@@ -47,7 +47,7 @@ func main() {
 		PreRunE: validateJson,
 		Run: func(cmd *cobra.Command, args []string) {
 			startTc := args[0]
-			resp := timecodetool.ValidateTimecode(startTc, fps)
+			resp := timecodetool.NewValidateTimecode(startTc, fps)
 			if jsonOutput {
 
 				if prettyPrintJsonOutput {
@@ -79,7 +79,7 @@ func main() {
 		Run: func(cmd *cobra.Command, args []string) {
 			startTc := args[0]
 			endTc := args[1]
-			resp := timecodetool.SpanTimecode(startTc, endTc, fps, excludeLastTimecode)
+			resp := timecodetool.NewSpanTimecode(startTc, endTc, fps, excludeLastTimecode)
 
 			if jsonOutput {
 
@@ -111,7 +111,7 @@ func main() {
 		PreRunE: validateJson,
 		Long:    "Timecode/Frame calculator. Enter either timecode strings or frame numbers. It will add all these all together and generate span. When entering a timecode the amount of frames added/subtracted is relative to 00:00:00:00, with the timecode entered being inclusive. Use the `-e` flag to make it exclusive.",
 		Run: func(cmd *cobra.Command, args []string) {
-			resp := timecodetool.CalculateTimecodes(args[0], args[1:], fps, excludeLastTimecode)
+			resp := timecodetool.NewCalculateTimecodes(args[0], args[1:], fps, excludeLastTimecode)
 
 			if jsonOutput {
 

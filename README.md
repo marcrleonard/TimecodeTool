@@ -7,15 +7,23 @@
 
 ## Installation
 
-### Download
+### Use as library
+
+`go get github.com/marcrleonard/TimecodeTool@latest`
+
+### Download binaries
 
 Download the latest from the [releases page](https://github.com/marcrleonard/TimecodeTool/releases).
 
-## Build
+## Build from source
 
-Clone the repo and run `make build`
+```shell
+git clone https://github.com/marcrleonard/TimecodeTool.git
+cd TimecodeTool 
+make build
+```
 
-## Usage
+## CLI Usage
 
 ### Validate
 `TimecodeTool validate "00:07:00;00" --fps=29.97`
