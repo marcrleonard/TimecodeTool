@@ -186,6 +186,25 @@ func (t *Timecode) Validate() error {
 	}
 
 	if t.DropFrame {
+
+		validDfTimecode := false
+		for _, fr := range []float64{29.97, 59.94} {
+			if t.FrameRate == fr {
+				validDfTimecode = true
+				break
+			}
+		}
+		if !validDfTimecode {
+			return fmt.Errorf("%s is not a valid dropframe timecode", t.GetFramerateString())
+		}
+
+		if t.GetFrameIdx() <= lastAllowedFrame {
+			// there is no point continuing validation in the janky way it is done
+			// as there is definitely no chance it has hit the df spots yet. Basically,
+			// everything before or equal to 00:00:00;29 or 00:00:00;59
+			return nil
+		}
+
 		if 0 <= int(t._frames) || int(t._frames) < 2 {
 			// This is potentially wrong for dropframe.
 
