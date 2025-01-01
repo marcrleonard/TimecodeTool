@@ -71,6 +71,49 @@ func TestRolloverBackwardsNDF(t *testing.T) {
 	require.Equal(t, "23:59:59:23", tc.GetTimecode())
 }
 
+func TestDfIFrameRates(t *testing.T) {
+	tests := []struct {
+		name      string
+		error     error
+		timecode  string
+		framerate float64
+	}{
+		{
+			name:      "valid 29.97",
+			error:     nil,
+			timecode:  "00:00:00;10",
+			framerate: 29.97,
+		},
+		{
+			name:      "valid 59.94",
+			error:     nil,
+			timecode:  "00:00:00;10",
+			framerate: 59.94,
+		},
+		{
+			name:      "valid 23.976",
+			error:     fmt.Errorf("23.976 is not a valid dropframe timecode"),
+			timecode:  "00:00:00;10",
+			framerate: 23.976,
+		},
+	}
+
+	for _, tt := range tests {
+		tc, err := NewTimecodeFromString(tt.timecode, tt.framerate)
+		require.Nil(t, err)
+
+		err = tc.Validate()
+
+		if tt.error != nil {
+			require.EqualError(t, err, tt.error.Error())
+		} else {
+			require.Nil(t, err)
+		}
+
+	}
+
+}
+
 func TestDFNonValid(t *testing.T) {
 
 	tests := []struct {

@@ -61,7 +61,7 @@ func main() {
 					panic("Error encoding json")
 				}
 			} else {
-				resp.PrettyPrint()
+				PrettyPrintValidate(resp)
 			}
 		},
 	}
@@ -94,7 +94,7 @@ func main() {
 					panic("Error encoding json")
 				}
 			} else {
-				resp.PrettyPrint()
+				PrettyPrintSpan(resp)
 			}
 		},
 	}
@@ -126,7 +126,7 @@ func main() {
 					panic("Error encoding json")
 				}
 			} else {
-				resp.PrettyPrint()
+				PrettyPrintCalc(resp)
 			}
 
 		},
@@ -194,6 +194,9 @@ func main() {
 
 		},
 	}
+	// This isn't really a secret, I just think it is probably not useful to the user, so
+	// I don't want it to be confusing.
+	docsCmd.Hidden = true
 
 	rootCmd.AddCommand(validateCmd, spanCmd, calcCmd, outputSchema, docsCmd)
 
