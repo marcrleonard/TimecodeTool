@@ -61,7 +61,7 @@ func main() {
 					panic("Error encoding json")
 				}
 			} else {
-				resp.PrettyPrint()
+				PrettyPrintValidate(resp)
 			}
 		},
 	}
@@ -94,7 +94,7 @@ func main() {
 					panic("Error encoding json")
 				}
 			} else {
-				resp.PrettyPrint()
+				PrettyPrintSpan(resp)
 			}
 		},
 	}
@@ -126,7 +126,7 @@ func main() {
 					panic("Error encoding json")
 				}
 			} else {
-				resp.PrettyPrint()
+				PrettyPrintCalc(resp)
 			}
 
 		},
