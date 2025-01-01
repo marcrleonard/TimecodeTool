@@ -239,7 +239,7 @@ func (t *Timecode) Validate() error {
 			}
 
 			if !valid {
-				return fmt.Errorf("%s is not valid timecode for drop frame.", t._timecode)
+				return fmt.Errorf("%s is not valid drop frame timecode.", t._timecode)
 			}
 
 		}
