@@ -40,7 +40,7 @@ jobs:
         run: |
           mkdir -p dist
           # Build for Linux (default)
-          make build
+          go build -o dist/TimecodeTool-linux-amd64 cmd/TimecodeTool/main.go
           # Build for macOS arm64
           GOOS=darwin GOARCH=arm64 go build -o dist/TimecodeTool-osx-arm64 cmd/TimecodeTool/main.go
           # Build for Windows amd64
