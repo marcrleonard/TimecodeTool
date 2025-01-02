@@ -1,0 +1,1 @@
+This contains an HTML template for converting the .md doc files to html. This may be moved into the doc repo eventually.
