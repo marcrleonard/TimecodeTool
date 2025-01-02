@@ -48,5 +48,5 @@ All dev is done through pull rests on main. They cannot be merged unless they pa
 Builds will only occur if the status check on main completes with a version bump. You can still merge into main without a version bump, but a build may not occur if it is not bumped.
 
 ## Todo
-- Do a check to make sure that frame rates and dropframe-ness are compat
+- Maybe introduce API in the lib to do NewTimecode and attempt to fix a broken timecode (divmod)
 - Introduce an API to convert timecodes between different frame rates

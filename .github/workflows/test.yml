@@ -10,6 +10,24 @@ on:
     branches: [ "main" ]
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Make sure the project can build
+        run: |
+          mkdir -p dist
+          # Build for Linux (default)
+          go build -o dist/TimecodeTool-linux-amd64 cmd/TimecodeTool/main.go
+          # Build for macOS arm64
+          GOOS=darwin GOARCH=arm64 go build -o dist/TimecodeTool-osx-arm64 cmd/TimecodeTool/main.go
+          # Build for Windows amd64
+          GOOS=windows GOARCH=amd64 go build -o dist/TimecodeTool-windows-amd64.exe cmd/TimecodeTool/main.go
+
   test:
     runs-on: ubuntu-latest
     steps:
