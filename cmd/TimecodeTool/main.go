@@ -408,7 +408,6 @@ func GetValueFromStruct(input interface{}, key string) (interface{}, error) {
 	if !ok {
 		return nil, errors.New("key not found in struct")
 	}
-	asd
 
 	return value, nil
 }
