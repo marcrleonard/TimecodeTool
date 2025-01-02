@@ -49,5 +49,4 @@ Builds will only occur if the status check on main completes with a version bump
 
 ## Todo
 - Maybe introduce API in the lib to do NewTimecode and attempt to fix a broken timecode (divmod)
-- Request a single value (by key) of json output. Something like `TimecodeTool validate 00:01:00:00 --json-output --key=valid` -> `true` 
 - Introduce an API to convert timecodes between different frame rates
