@@ -203,7 +203,8 @@ func main() {
 	calcCmd.MarkFlagsOneRequired("fps")
 
 	outputSchema := &cobra.Command{
-		Use: "schema [validate|span|calculate]",
+		Use:   "schema [validate|span|calculate]",
+		Short: "Returns a valid json schema that describes the json output for each tool in the CLI",
 		Long: "Returns a valid json schema that describes the json output of each of the tools in the CLI. Examples:" +
 			"\n  TimecodeTool schema validate" +
 			"\n  TimecodeTool schema span" +
