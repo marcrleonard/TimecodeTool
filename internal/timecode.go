@@ -155,17 +155,6 @@ func (t *Timecode) GetTimecode() string {
 	return formatTimecode(int64(hr), int64(mr), int64(sr), int64(fr), t.DropFrame)
 }
 
-func (t *Timecode) GetValid() string {
-	isValid := "Valid"
-	err := t.Validate()
-	if err != nil {
-		// isValid = err.Error()
-		isValid = "Not Valid"
-	}
-
-	return isValid
-}
-
 func (t *Timecode) Validate() error {
 	// println("+++")
 	if t._hours > 23 {
@@ -211,14 +200,6 @@ func (t *Timecode) Validate() error {
 	}
 
 	return nil
-}
-
-func (t *Timecode) PrintPieces() {
-	fmt.Println(t._hours, t._mins, t._secs, t._frames)
-}
-
-func (t *Timecode) Print() {
-	fmt.Println(t.GetTimecode())
 }
 
 func (t *Timecode) AddFrames(frames int) {

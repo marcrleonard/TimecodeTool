@@ -20,7 +20,7 @@ func NewValidateTimecode(startTc string, fps float64) *ValidateResponse {
 	nextFrame, _ := internal.NewTimecodeFromString(startTc, fps)
 	nextFrame.AddFrames(1)
 
-	return newOkValidateResponse(startTc, fps, firstTc.DropFrame, nextFrame.GetTimecode())
+	return newOkValidateResponse(startTc, fps, firstTc.DropFrame, firstTc.GetFrameIdx(), nextFrame.GetTimecode())
 
 }
 

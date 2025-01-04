@@ -6,6 +6,7 @@ type ValidateResponse struct {
 	Valid         bool    `json:"valid"`
 	ErrorMsg      string  `json:"errorMsg"`
 	IsDf          bool    `json:"isDf"`
+	FrameIdx      int     `json:"frameIdx"`
 	NextTimecode  string  `json:"nextTimecode"`
 }
 type SpanResponse struct {
@@ -102,12 +103,13 @@ func newFailedCalcResponse(
 	}
 }
 
-func newOkValidateResponse(InputTimecode string, InputFps float64, IsDf bool, NextTimecode string) *ValidateResponse {
+func newOkValidateResponse(InputTimecode string, InputFps float64, IsDf bool, FrameIdx int, NextTimecode string) *ValidateResponse {
 	return &ValidateResponse{
 		InputTimecode: InputTimecode,
 		InputFps:      InputFps,
 		Valid:         true,
 		IsDf:          IsDf,
+		FrameIdx:      FrameIdx,
 		NextTimecode:  NextTimecode,
 	}
 }
