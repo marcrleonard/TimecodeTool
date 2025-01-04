@@ -92,7 +92,7 @@ func TestDfIFrameRates(t *testing.T) {
 		},
 		{
 			name:      "valid 23.976",
-			error:     fmt.Errorf("23.976 is not a valid dropframe timecode"),
+			error:     fmt.Errorf("23.976 is not a valid framerate for drop frame timecode"),
 			timecode:  "00:00:00;10",
 			framerate: 23.976,
 		},
@@ -114,6 +114,191 @@ func TestDfIFrameRates(t *testing.T) {
 
 }
 
+func TestSeriesTc(t *testing.T) {
+
+	tests := []struct {
+		name      string
+		timecodes []struct {
+			timecode string
+			valid    bool
+		}
+		framerate float64
+	}{
+		{
+			name: "29.97df",
+			timecodes: []struct {
+				timecode string
+				valid    bool
+			}{
+				{
+					timecode: "00:00:00;28",
+					valid:    true,
+				},
+				{
+					timecode: "00:00:00;29",
+					valid:    true,
+				},
+				{
+					timecode: "00:00:01;00",
+					valid:    true,
+				},
+				{
+					timecode: "00:00:01;01",
+					valid:    true,
+				},
+				{
+					timecode: "00:01:00;28",
+					valid:    true,
+				},
+				{
+					timecode: "00:01:00;29",
+					valid:    true,
+				},
+				{
+					timecode: "00:02:00;00",
+					valid:    false,
+				},
+				{
+					timecode: "00:02:00;01",
+					valid:    false,
+				},
+				{
+					timecode: "00:02:00;02",
+					valid:    true,
+				},
+				{
+					timecode: "00:02:00;03",
+					valid:    true,
+				},
+				{
+					timecode: "00:09:59;28",
+					valid:    true,
+				},
+				{
+					timecode: "00:09:59;29",
+					valid:    true,
+				},
+				{
+					timecode: "00:10:00;00",
+					valid:    true,
+				},
+				{
+					timecode: "00:10:00;01",
+					valid:    true,
+				},
+				{
+					timecode: "00:10:00;02",
+					valid:    true,
+				},
+				{
+					timecode: "00:10:00;03",
+					valid:    true,
+				},
+			},
+			framerate: 29.97,
+		},
+		{
+			name: "59.94df",
+			timecodes: []struct {
+				timecode string
+				valid    bool
+			}{
+				{
+					timecode: "00:00:00;58",
+					valid:    true,
+				},
+				{
+					timecode: "00:00:00;59",
+					valid:    true,
+				},
+				{
+					timecode: "00:00:01;00",
+					valid:    true,
+				},
+				{
+					timecode: "00:00:01;01",
+					valid:    true,
+				},
+				{
+					timecode: "00:01:00;58",
+					valid:    true,
+				},
+				{
+					timecode: "00:01:00;59",
+					valid:    true,
+				},
+				{
+					timecode: "00:02:00;00",
+					valid:    false,
+				},
+				{
+					timecode: "00:02:00;01",
+					valid:    false,
+				},
+				{
+					timecode: "00:02:00;02",
+					valid:    false,
+				},
+				{
+					timecode: "00:02:00;03",
+					valid:    false,
+				},
+				{
+					timecode: "00:02:00;04",
+					valid:    true,
+				},
+				{
+					timecode: "00:02:00;05",
+					valid:    true,
+				},
+				{
+					timecode: "00:09:59;58",
+					valid:    true,
+				},
+				{
+					timecode: "00:09:59;59",
+					valid:    true,
+				},
+				{
+					timecode: "00:10:00;00",
+					valid:    true,
+				},
+				{
+					timecode: "00:10:00;01",
+					valid:    true,
+				},
+				{
+					timecode: "00:10:00;02",
+					valid:    true,
+				},
+				{
+					timecode: "00:10:00;03",
+					valid:    true,
+				},
+			},
+			framerate: 59.94,
+		},
+	}
+	t.Parallel()
+	for _, tt := range tests {
+
+		for _, timecode := range tt.timecodes {
+			t.Run(tt.name, func(t *testing.T) {
+				tc, err := NewTimecodeFromString(timecode.timecode, tt.framerate)
+				require.Nil(t, err)
+				err = tc.Validate()
+				if timecode.valid {
+					require.Nil(t, err)
+				} else {
+					require.NotNil(t, err)
+				}
+			})
+		}
+
+	}
+
+}
+
 func TestDFNonValid(t *testing.T) {
 
 	tests := []struct {
@@ -123,8 +308,8 @@ func TestDFNonValid(t *testing.T) {
 		framerate float64
 	}{
 		{
-			name:      "Errors when invalid dropframe timecode",
-			error:     fmt.Errorf("00:07:00;00 is not valid drop frame timecode."),
+			name:      "Errors when invalid drop frame timecode",
+			error:     fmt.Errorf("00:07:00;00 is not valid drop frame timecode"),
 			timecode:  "00:07:00;00",
 			framerate: 29.97,
 		},
