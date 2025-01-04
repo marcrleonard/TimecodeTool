@@ -304,6 +304,7 @@ func PrettyPrintValidate(r *timecodetool.ValidateResponse) {
 			dfIndicator = " (Drop Frame)"
 		}
 		fmt.Printf("Valid Timecode:   ✅ Yes%s\n", dfIndicator)
+		fmt.Printf("Frame Index:      %d\n", r.FrameIdx)
 		fmt.Printf("Next Timecode:    %s\n", r.NextTimecode)
 	} else {
 		fmt.Printf("Valid Timecode:   ❌ No\n")
