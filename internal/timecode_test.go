@@ -71,6 +71,78 @@ func TestRolloverBackwardsNDF(t *testing.T) {
 	require.Equal(t, "23:59:59:23", tc.GetTimecode())
 }
 
+func Test_TimecodeIndexes(t *testing.T) {
+	tests := []struct {
+		name        string
+		timecode    string
+		framerate   float64
+		expectedIdx int
+	}{
+		{
+			name:        "29.97",
+			timecode:    "00:00:00:00",
+			framerate:   29.97,
+			expectedIdx: 0,
+		},
+		{
+			name:        "29.97",
+			timecode:    "00:00:01:00",
+			framerate:   29.97,
+			expectedIdx: 30,
+		},
+		{
+			name:        "29.97",
+			timecode:    "01:00:00:00",
+			framerate:   29.97,
+			expectedIdx: 108000,
+		},
+		{
+			name:        "29.97",
+			timecode:    "10:00:00:00",
+			framerate:   29.97,
+			expectedIdx: 1080000,
+		},
+		{
+			name:        "24",
+			timecode:    "00:00:01:00",
+			framerate:   24,
+			expectedIdx: 24,
+		},
+		{
+			name:        "24",
+			timecode:    "01:00:00:00",
+			framerate:   24,
+			expectedIdx: 86400,
+		},
+		{
+			name:        "24",
+			timecode:    "10:00:00:00",
+			framerate:   24,
+			expectedIdx: 864000,
+		},
+		{
+			name:        "24",
+			timecode:    "20:00:00:00",
+			framerate:   24,
+			expectedIdx: 1_728_000,
+		},
+		{
+			name:        "24",
+			timecode:    "23:00:00:00",
+			framerate:   24,
+			expectedIdx: 1_728_000,
+		},
+	}
+	t.Parallel()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tc, err := NewTimecodeFromString(tt.timecode, tt.framerate)
+			require.NoError(t, err)
+			require.Equal(t, tt.expectedIdx, tc.GetFrameIdx())
+		})
+	}
+}
+
 func TestDfIFrameRates(t *testing.T) {
 	tests := []struct {
 		name      string
