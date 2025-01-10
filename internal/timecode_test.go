@@ -130,7 +130,7 @@ func Test_TimecodeIndexes(t *testing.T) {
 			name:        "24",
 			timecode:    "23:00:00:00",
 			framerate:   24,
-			expectedIdx: 1_728_000,
+			expectedIdx: 1987200,
 		},
 	}
 	t.Parallel()

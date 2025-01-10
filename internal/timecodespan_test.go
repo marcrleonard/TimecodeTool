@@ -100,7 +100,7 @@ func Test_SpanIndexes(t *testing.T) {
 		{
 			name:           "24",
 			startTimecode:  "00:00:00:00",
-			endTimecode:    "23:59:59:29",
+			endTimecode:    "23:59:59:23",
 			fps:            24,
 			spanFrameCount: 2073600,
 		},
