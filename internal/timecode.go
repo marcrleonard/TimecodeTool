@@ -266,8 +266,8 @@ func (t *Timecode) GetFrameCount() int {
 
 func (t *Timecode) GetFrameIdx() int {
 
-	var timeBase int = getTimeBase(t.FrameRate)
-	var frameCount int = 0
+	timeBase := getTimeBase(t.FrameRate)
+	frameCount := 0
 	if t.DropFrame == false {
 		hrsToSecs := t._hours * 60 * 60
 		minsToSecs := t._mins * 60

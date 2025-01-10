@@ -2,6 +2,8 @@ package internal
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewTimecodeSpan(t *testing.T) {
@@ -68,5 +70,55 @@ func TestGetSpanRealtime(t *testing.T) {
 	expected := "00:00:10.042" // 10.042 seconds in real time
 	if got := span.GetSpanRealtime(); got != expected {
 		t.Errorf("expected realtime %v, got %v", expected, got)
+	}
+}
+
+func Test_SpanIndexes(t *testing.T) {
+	tests := []struct {
+		name           string
+		startTimecode  string
+		endTimecode    string
+		fps            float64
+		firstIdx       int
+		lastIdx        int
+		spanFrameCount int
+	}{
+		{
+			name:           "24",
+			startTimecode:  "00:00:00:00",
+			endTimecode:    "00:00:01:00",
+			fps:            24,
+			spanFrameCount: 25,
+		},
+		{
+			name:           "25",
+			startTimecode:  "00:00:00:00",
+			endTimecode:    "00:10:01:03",
+			fps:            25,
+			spanFrameCount: 15029,
+		},
+		{
+			name:           "24",
+			startTimecode:  "00:00:00:00",
+			endTimecode:    "23:59:59:23",
+			fps:            24,
+			spanFrameCount: 2073600,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			start, err := NewTimecodeFromString(test.startTimecode, test.fps)
+			require.NoError(t, err)
+			end, err := NewTimecodeFromString(test.endTimecode, test.fps)
+			require.NoError(t, err)
+			span, err := NewTimecodeSpan(start, end)
+			require.NoError(t, err)
+
+			_ = span.GetSpanRealtime()
+
+			require.Equal(t, test.spanFrameCount, span.GetTotalFrames())
+
+		})
 	}
 }
