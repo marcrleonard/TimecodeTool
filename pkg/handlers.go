@@ -36,6 +36,14 @@ func NewSpanTimecode(startTc string, endTc string, fps float64, excludeLastTimec
 	if err != nil {
 		allErrors = append(allErrors, fmt.Errorf("Last timecode error: %w", err))
 	}
+	if excludeLastTimecode {
+		if firstTc.GetFrameIdx() == lastTimecode.GetFrameIdx() {
+			allErrors = append(allErrors, errors.New("This is span has no frames in it."))
+		} else {
+			lastTimecode.AddFrames(-1)
+		}
+
+	}
 
 	if err := firstTc.Validate(); err != nil {
 		allErrors = append(allErrors, err)
