@@ -303,11 +303,11 @@ func PrettyPrintValidate(r *timecodetool.ValidateResponse) {
 		if r.IsDf {
 			dfIndicator = " (Drop Frame)"
 		}
-		fmt.Printf("Valid Timecode:   ✅ Yes%s\n", dfIndicator)
+		fmt.Printf("Valid Timecode:   ✅  Yes%s\n", dfIndicator)
 		fmt.Printf("Frame Index:      %d\n", r.FrameIdx)
 		fmt.Printf("Next Timecode:    %s\n", r.NextTimecode)
 	} else {
-		fmt.Printf("Valid Timecode:   ❌ No\n")
+		fmt.Printf("Valid Timecode:   ❌  No\n")
 		fmt.Printf("Error:            %s\n", r.ErrorMsg)
 	}
 
@@ -328,13 +328,13 @@ func PrettyPrintSpan(r *timecodetool.SpanResponse) {
 	}
 
 	// Print First and Last Timecodes
-	fmt.Printf("First Timecode:   %s\n", printInvalidTimecode(r.InputFirstTimecode))
-	fmt.Printf("Last Timecode:    %s\n", printInvalidTimecode(r.InputLastTimecode))
-	fmt.Printf("Frame Rate (FPS): %.2f\n", r.InputFps)
+	fmt.Printf("First Timecode:    %s\n", printInvalidTimecode(r.InputFirstTimecode))
+	fmt.Printf("Last Timecode:     %s\n", printInvalidTimecode(r.InputLastTimecode))
+	fmt.Printf("Frame Rate (FPS):  %.2f\n", r.InputFps)
 
 	// Output based on the validity of the span
 	if r.Valid {
-		fmt.Printf("Valid Span:       ✅ Yes\n")
+		fmt.Printf("Valid Span:       ✅  Yes\n")
 		fmt.Printf("Start Frame Index:    %d\n", r.StartFrameIdx)
 		fmt.Printf("Last Frame Index:     %d\n", r.LastFrameIdx)
 		fmt.Printf("Length (Frames):      %d\n", r.LengthFrames)
@@ -343,8 +343,8 @@ func PrettyPrintSpan(r *timecodetool.SpanResponse) {
 		fmt.Printf("Length (Timecode):    %s\n", r.LengthTimecode)
 		fmt.Printf("Next Timecode:        %s\n", r.NextTimecode)
 	} else {
-		fmt.Printf("Valid Span:        ❌ No\n")
-		fmt.Printf("Error:                %s\n", r.ErrorMsg)
+		fmt.Printf("Valid Span:        ❌  No\n")
+		fmt.Printf("Error:             %s\n", r.ErrorMsg)
 	}
 
 	printSeparator()
