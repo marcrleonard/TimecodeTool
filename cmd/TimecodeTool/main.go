@@ -140,7 +140,16 @@ func main() {
 	}
 	spanCmd.Flags().BoolVar(&jsonOutput, "json-output", false, "Output as JSON")
 	spanCmd.Flags().BoolVar(&prettyPrintJsonOutput, "pretty-print", false, "Output indented JSON")
-	spanCmd.Flags().BoolVarP(&excludeLastTimecode, "exclude-last-timecode", "e", false, `When entering a first timecode and a last timecode, the calculations will be based off the last timecode, minus one frame. This typically make it easier to read and enter timecode. For instance, with this flag set, a span of "00:00:00:00" "00:00:01:00" represents one second.`)
+	spanCmd.Flags().BoolVarP(&excludeLastTimecode, "exclude-last-timecode", "e", false, `Makes the last timecode EXCLUSIVE (industry standard behavior).
+
+WITHOUT -e (default): Spans are INCLUSIVE of both endpoints.
+  Example at 24fps: "00:00:00:00" to "00:00:01:00"
+    Result: 25 frames (1.042 seconds) - includes frames 0-24
+
+WITH -e: Spans are EXCLUSIVE of the last timecode.
+  Example at 24fps: "00:00:00:00" to "00:00:01:00"
+    Result: 24 frames (1.000 seconds) - includes frames 0-23, excludes 24
+    This matches Adobe Premiere, Final Cut Pro, and other NLEs.`)
 	spanCmd.Flags().Float64Var(&fps, "fps", 29.97, "Frame rate of timecodes")
 	spanCmd.Flags().StringVar(&keyOutput, "key", "", "Specifies the key of which the sole value will be returned.")
 	spanCmd.MarkFlagsOneRequired("fps")
@@ -197,7 +206,16 @@ func main() {
 	}
 	calcCmd.Flags().BoolVar(&jsonOutput, "json-output", false, "Output as JSON")
 	calcCmd.Flags().BoolVar(&prettyPrintJsonOutput, "pretty-print", false, "Output indented JSON")
-	calcCmd.Flags().BoolVarP(&excludeLastTimecode, "exclude-last-timecode", "e", false, `When entering a timecode to be added or subtracted, the calculations will be based off the timecode, minus one frame. This typically make it easier to read and enter timecode."`)
+	calcCmd.Flags().BoolVarP(&excludeLastTimecode, "exclude-last-timecode", "e", false, `Makes timecodes in operations EXCLUSIVE (subtracts one frame).
+
+WITHOUT -e (default): Timecodes represent their frame index + 1.
+  Example at 24fps: Adding "00:00:01:00"
+    Adds 24 frames (the frame index of 00:00:01:00)
+
+WITH -e: Timecodes are treated as exclusive (minus one frame).
+  Example at 24fps: Adding "00:00:01:00"
+    Adds 23 frames (00:00:01:00 minus one frame)
+    Useful when thinking of timecodes as end points.`)
 	calcCmd.Flags().Float64Var(&fps, "fps", 29.97, "Frame rate of timecodes")
 	calcCmd.Flags().StringVar(&keyOutput, "key", "", "Specifies the key of which the sole value will be returned.")
 	calcCmd.MarkFlagsOneRequired("fps")
@@ -208,7 +226,8 @@ func main() {
 		Long: "Returns a valid json schema that describes the json output of each of the tools in the CLI. Examples:" +
 			"\n  TimecodeTool schema validate" +
 			"\n  TimecodeTool schema span" +
-			"\n  TimecodeTool schema calculate",
+			"\n  TimecodeTool schema calculate" +
+			"Note: This schema is not appliacle if specifying a `--key` output ",
 		Args:      cobra.ExactArgs(1), // Expect exactly one argument
 		ValidArgs: []string{"validate", "span", "calculate"},
 		Run: func(cmd *cobra.Command, args []string) {

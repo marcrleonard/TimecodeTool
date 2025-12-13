@@ -53,6 +53,14 @@ func NewSpanTimecode(startTc string, endTc string, fps float64, excludeLastTimec
 		allErrors = append(allErrors, err)
 	}
 
+	// Check for backward span (end before start)
+	if firstTc.GetFrameIdx() > lastTimecode.GetFrameIdx() {
+		allErrors = append(allErrors, fmt.Errorf(
+			"End timecode (%s at frame %d) cannot be before start timecode (%s at frame %d). "+
+				"Please swap the timecodes or use a 24-hour wrap feature (not yet implemented)",
+			endTc, lastTimecode.GetFrameIdx(), startTc, firstTc.GetFrameIdx()))
+	}
+
 	if len(allErrors) > 0 {
 		return newFailedSpanResponse(startTc, endTc, fps, excludeLastTimecode, errors.Join(allErrors...).Error())
 	}
@@ -64,7 +72,9 @@ func NewSpanTimecode(startTc string, endTc string, fps float64, excludeLastTimec
 
 	nextTimecode, err := internal.NewTimecodeFromString(endTc, fps)
 	if err != nil {
-		panic("Error generating next timecode")
+		// This should never happen since we already validated endTc, but handle it gracefully
+		return newFailedSpanResponse(startTc, endTc, fps, excludeLastTimecode,
+			fmt.Sprintf("Internal error: failed to generate next timecode: %v", err))
 	}
 	nextTimecode.AddFrames(1)
 
@@ -115,15 +125,15 @@ func NewCalculateTimecodes(inTc string, operations []string, fps float64, exclud
 
 		switch opperator {
 		case "-":
-			lastTimecode.AddFrames(int(nexTc.GetFrameCount()) * -1)
+			lastTimecode.AddFrames(int(nexTc.GetFrameIdx()) * -1)
 		case "+":
-			lastTimecode.AddFrames(int(nexTc.GetFrameCount()))
+			lastTimecode.AddFrames(int(nexTc.GetFrameIdx()))
 		}
 
 		calcSteps = append(calcSteps, CalculationStep{
 			Operation: opperator,
 			Timecode:  nexTc.GetTimecode(), // fix this
-			Frames:    int(nexTc.GetFrameCount()),
+			Frames:    int(nexTc.GetFrameIdx()),
 		})
 
 		curIdx += 2

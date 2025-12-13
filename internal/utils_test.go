@@ -16,8 +16,8 @@ func TestParseStringToTimecode(t *testing.T) {
 	}{
 		{"Valid Frame Count", "300", 30.0, false, false, 300, false},
 		{"Frame Count With Exclude", "300", 30.0, true, false, 300, false},
-		{"Valid Timecode", "00:00:10:00", 30.0, false, false, 301, false},
-		{"Valid Timecode", "00:00:10:00", 30.0, true, false, 300, false},
+		{"Valid Timecode", "00:00:10:00", 30.0, false, false, 300, false},
+		{"Valid Timecode", "00:00:10:00", 30.0, true, false, 299, false},
 		{"Invalid Timecode", "invalid", 30.0, false, false, 0, true},
 	}
 
@@ -27,8 +27,8 @@ func TestParseStringToTimecode(t *testing.T) {
 			if (err != nil) != tt.expectError {
 				t.Fatalf("Expected error: %v, got: %v", tt.expectError, err)
 			}
-			if err == nil && tc.GetFrameCount() != tt.expectedFrames {
-				t.Errorf("Expected frames: %d, got: %d", tt.expectedFrames, tc.GetFrameCount())
+			if err == nil && tc.GetFrameIdx() != tt.expectedFrames {
+				t.Errorf("Expected frame index: %d, got: %d", tt.expectedFrames, tc.GetFrameIdx())
 			}
 		})
 	}
