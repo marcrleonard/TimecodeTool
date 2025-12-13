@@ -13,7 +13,9 @@ import (
 func ParseStringToTimecode(in string, fps float64, excludeLastTimecode bool, dropFrame bool) (*Timecode, error) {
 	frames, err := strconv.Atoi(in)
 	if err == nil {
-		frameIdx := int64(frames - 1)
+		// Frame numbers represent frame indices directly
+		// e.g., "24" means add 24 frames (move to frame index current + 24)
+		frameIdx := int64(frames)
 		return NewTimecodeFromFrames(frameIdx, fps, dropFrame)
 	}
 	time, err := NewTimecodeFromString(in, fps)

@@ -23,7 +23,9 @@ func NewTimecodeSpan(firstTimecode, lastTimecode *Timecode) (*TimecodeSpan, erro
 	}, nil
 }
 
-// TOdo: This calc appears to be wrong
+// GetTotalSeconds returns the span duration in seconds.
+// This calculates based on the inclusive frame count by default.
+// Use the -e flag for exclusive behavior (industry standard).
 func (t *TimecodeSpan) GetTotalSeconds() float64 {
 	tf := t.GetTotalFrames()
 
